@@ -46,12 +46,12 @@ $(document).ready(function() {
     url: metadataBaseUrl + "/scene-graph.json",
     type: "GET",
     success: function(result) {
-      var graph = result; // JSON.parse(result);
+      var graph = JSON.parse(result);
       $.ajax({
         url: metadataBaseUrl + "/codemann8-data.json",
         type: "GET",
         success: function(result) {
-          var codemann8Data = result;
+          var codemann8Data = JSON.parse(result);
           for (let link of codemann8Data.links) {
             graph.links.push(link);
           }
@@ -59,12 +59,12 @@ $(document).ready(function() {
             url: metadataBaseUrl + "/field-id-to-world-map-coords.json",
             type: "GET",
             success: function(result) {
-              var fieldIdToWorldMapCoords = result;
+              var fieldIdToWorldMapCoords = JSON.parse(result);
               $.ajax({
                 url: metadataBaseUrl + "/wm-field-menu-names.json",
                 type: "GET",
                 success: function(result) {
-                  var wmFieldMenuNames = result;
+                  var wmFieldMenuNames = JSON.parse(result);
                   // 9216 * 32 = 294912, 7168 * 32 = 229376
                   var width = 9216 * 32, height = 7168 * 32;
 
