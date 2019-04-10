@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+<style>
+
+.links line {
+  /*stroke: #999;*/
+  stroke-opacity: 0.6;
+}
+
+/*
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+*/
+
+text {
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+</style>
+
+<!-- 9216 x 7168 -->
+
+<div style="width:1200px; height:800px; padding:0; margin:auto; background-color:#f8f8f8;">
+  <!--<img width="1500" height="800" src="world-map.png" style="position:absolute; z-index:0"></img>-->
+  <!--<div style="width:1500px; height:800px;                   position:absolute; z-index:1; background-color:rgba(0,0,0,0.5)"></div>-->
+  <svg width="1200" height="800" style="padding:0"> <!-- style="position:absolute; z-index:2" -->
+    <!--<image xlink:href="world-map.png" width="9216" height="7168"></image>-->
+  </svg>
+</div>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+
+var baseUrl = "http://localhost:8080";
+var handleErrorGeneric = function(error) {
+  alert('Error!', JSON.stringify(error, null, 2));
+};
+
+$(document).ready(function() {
+  $.ajax({
+    url: baseUrl + "/kujata-data/metadata/scene-graph.json",
+    type: "GET",
+    success: function(result) {
+      var graph = result; // JSON.parse(result);
+      $.ajax({
+        url: baseUrl + "/kujata-data/metadata/codemann8-data.json",
+        type: "GET",
+        success: function(result) {
+          var codemann8Data = result;
+          for (let link of codemann8Data.links) {
+            graph.links.push(link);
+          }
+          $.ajax({
+            url: baseUrl + "/kujata-data/metadata/field-id-to-world-map-coords.json",
+            type: "GET",
+            success: function(result) {
+              var fieldIdToWorldMapCoords = result;
+              $.ajax({
+                url: baseUrl + "/kujata-data/metadata/wm-field-menu-names.json",
+                type: "GET",
+                success: function(result) {
+                  var wmFieldMenuNames = result;
+                  // 9216 * 32 = 294912, 7168 * 32 = 229376
+                  var width = 9216 * 32, height = 7168 * 32;
+
+                  var customScale = 8; // take out *32 to make things fit in Midgar, leave in *32 to see everything in one map
+
+                  // make the debug rooms be located at the bottom of the map
+                  fieldIdToWorldMapCoords[65] = {"meshX":15, "meshY":1, "coorX":0, "coorY":0}; // startmap
+                  for (let i=93; i<=112; i++) {
+                    let meshX = 15;
+                    let meshY = 1;
+                    let coorX = (i-92)*200;
+                    let coorY = (i-92)*200;
+                    graph.nodes[i].x = (meshX * 0x2000 + coorX); //  / 32;
+                    graph.nodes[i].y = (meshY * 0x2000 + coorY); //  / 32;
+                  }
+                  //fieldIdToWorldMapCoords[1] = {"meshX": 22, "meshY": 15, "coorX": 5412, "coorY": 445 }; // wm0 = Midgar south side
+                  //                           5412,3000
+                  //               3712,3700
+                  //    3012,5400              5412,5400               7812,5400
+                  //                                        7112,7100
+                  //                           5412,7800
+                  // north edge of midgar =      {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 3000 };
+                  // west  edge of midgar =      {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 5400 };
+                  // center     of midgar =      {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 5400 }; // +/- 2400
+                  // south edge of midgar =      {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 7800 };
+                  fieldIdToWorldMapCoords[225] = {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 5400 }; // sector 0        in center         of Midgar (Shinra bldg entrance)
+                  fieldIdToWorldMapCoords[249] = {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 4700 }; // shinra floor 65 above center      of Midgar
+
+                  fieldIdToWorldMapCoords[116] = {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 3000 }; // sector 1        in north         of Midgar
+                  fieldIdToWorldMapCoords[169] = {"meshX": 22, "meshY": 14, "coorX": 7112, "coorY": 7100 }; // sector 4 connected to sector 5
+                  fieldIdToWorldMapCoords[129] = {"meshX": 22, "meshY": 14, "coorX": 5600, "coorY": 7600 }; // sector 5 connected to sector 4
+                  //fieldIdToWorldMapCoords[172] = {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 7800 }; // sector 5 slum   in south     side of Midgar
+                  fieldIdToWorldMapCoords[170] = {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 7800 }; // sector 5 slum outskirts in south     side of Midgar
+                  fieldIdToWorldMapCoords[172] = {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 7800 }; // sector 5 connected to sector 6
+                  fieldIdToWorldMapCoords[191] = {"meshX": 22, "meshY": 14, "coorX": 3712, "coorY": 7100 }; // sector 6 connected to sector 5
+                  fieldIdToWorldMapCoords[192] = {"meshX": 22, "meshY": 14, "coorX": 3512, "coorY": 7100 }; // sector 6 connected to sector 7
+                  fieldIdToWorldMapCoords[156] = {"meshX": 22, "meshY": 14, "coorX": 3012, "coorY": 5400 }; // sector 7 connected to sector 6
+                  fieldIdToWorldMapCoords[738] = {"meshX": 22, "meshY": 14, "coorX": 3712, "coorY": 3700 }; // sector 8        in northwest side of Midgar
+                  fieldIdToWorldMapCoords[136] = {"meshX": 22, "meshY": 14, "coorX": 4212, "coorY": 3350 }; // sector 8 connected to sector 1
+                  fieldIdToWorldMapCoords[119] = {"meshX": 22, "meshY": 14, "coorX": 5412, "coorY": 4000 }; // sector 1 connected to sectors 5, 8
+
+                  // sector 1     : 116 = beginning of game
+                  // sector 4<=>5 : 169 = sector 4, 129 = sector 5
+                  // sector 5<=>6 : 172 = sector 5, 191 = sector 6
+                  // sector 6<=>7 : 192 = sector 6, 156 = sector 7
+                  // sector 8<=>1 : 136 = sector 8, 119 = sector 1
+
+                  console.log("fieldIdToWorldMapCoords:", fieldIdToWorldMapCoords);
+
+                  for (let n of graph.nodes) {
+                    let coordsData = fieldIdToWorldMapCoords[n.id];
+                    //console.log(n.id + " coordsData:", coordsData);
+                    if (coordsData) {
+                      let row = coordsData.meshX;
+                      let col = coordsData.meshY;
+                      n.fx = (coordsData.meshX * 0x2000 + coordsData.coorX); //  / 32;
+                      n.fy = (coordsData.meshY * 0x2000 + coordsData.coorY); //  / 32;
+                      console.log("set fixed x,y for:", n);
+                    // } else {
+                    //   let row = Math.floor((n.id-1) / 8);
+                    //   let col = (n.id-1) % 8;
+                    //   n.fx = width  * ((col+0.5)/8.0);
+                    //   n.fy = height * ((row+0.5)/8.0);
+                    }
+                    if (!n.fx && !n.x) {
+                      n.x = (Math.random() * width);
+                      n.y = (Math.random() * height);
+                    }
+                  }
+
+                  let nodeIdToNodeMap = {};
+                  for (let node of graph.nodes) {
+                    nodeIdToNodeMap[node.id] = node;
+                  }
+
+                  // add a link from nibelheim gate to nibelheim, otherwise nibelheim gate will be an orphan node
+                  graph.links.push({"source":279,"target":19,"type":"MAPJUMP"});
+
+                  let isDebugNode = function(node) {
+                    if (node.fieldName.startsWith("blackbg")) return true;
+                    if (node.fieldName.startsWith("whitebg")) return true;
+                    if (node.fieldName.startsWith("startmap")) return true;
+                    return false;
+                  }
+
+                  let isHighwindNode = function(node) {
+                    return (node.id >= 66 && node.id <= 76);
+                  }
+
+                  let isNibelheimNode = function(node) {
+                    if (node.fieldName.startsWith("niv")) return true;
+                    if (node.fieldName.startsWith("nv")) return true;
+                    if (node.fieldName.startsWith("trackin")) return true; // zack's truck (i think)
+                    return false;
+                  }
+
+                  let isKalmNode = function(node) {
+                    if (node.fieldName.startsWith("elm")) return true;
+                    return false;
+                  }
+
+                  let isReactor5Node = function(node) {
+                    if (node.fieldName.startsWith("smkin")) return true;
+                    return false;
+                  }
+
+                  for (let link of graph.links) {
+                    let sourceNode = nodeIdToNodeMap[link.source];
+                    let targetNode = nodeIdToNodeMap[link.target];
+                    let hasReactor5 = isReactor5Node(sourceNode) || isReactor5Node(targetNode);
+                    let hasKalm = isKalmNode(sourceNode) || isKalmNode(targetNode);
+                    let hasNibelheim = isNibelheimNode(sourceNode) || isNibelheimNode(targetNode);
+                    let hasNonNibelheim = !isNibelheimNode(sourceNode) || !isNibelheimNode(targetNode);
+                    // make any links between Kalm and Nibelheim to be "flashback" links
+                    if (hasNibelheim && hasNonNibelheim) {
+                      link.type = "flashback";
+                      console.log("changed link type to flashback", link);
+                    }
+                    // make any links between debug nodes and non-debug nodes to be "debug" links
+                    let hasDebug = isDebugNode(sourceNode) || isDebugNode(targetNode);
+                    let hasNonDebug = !isDebugNode(sourceNode) || !isDebugNode(targetNode);
+                    if (hasDebug && hasNonDebug) {
+                      link.type = "debug";
+                      console.log("changed link type to debug", link);
+                    }
+                    let hasHighwind = isHighwindNode(sourceNode) || isHighwindNode(targetNode);
+                    let hasNonHighwind = !isHighwindNode(sourceNode) || !isHighwindNode(targetNode);
+                    if (hasHighwind && hasNonHighwind) {
+                      link.type = "flashback";
+                      console.log("changed link type to flashback", link);
+                    }
+                  }
+
+                  var svg = d3.select("svg"),
+                      view = svg.append("g").attr("class", "view");
+
+                  var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+                  var typeToColorsMap = {
+                    "wm": "white",    // "#33cc33",
+                    "field": "white", // "#5555ee",
+                    "error": "#dd4444"
+                  };
+                  var typeToBorderColorMap = {
+                    "wm": "#33cc33",
+                    "field": "#9999ff",
+                    "error": "#dd4444"
+                  };
+                  var typeToFontSizeMap = {
+                    "wm": (128 * customScale) + "pt",
+                    "field": (16 * customScale) + "pt",
+                    "error": (16 * customScale) + "pt"
+                  };
+                  var typeToRadiusMap = {
+                    "wm": 64 * customScale,
+                    "field": 24 * customScale,
+                    "error": 24 * customScale
+                  };
+                  var typeToLabelYMap = {
+                    "wm": -128 * customScale,
+                    "field": -40 * customScale,
+                    "error": -40 * customScale
+                  };
+                  var linkTypeToColorsMap = {
+                    "flashback": "rgba(255,255,255,0.1)",
+                    "debug": "rgba(255,255,255,0.1)"
+                  };
+
+                  var mapImage = view.append("image")
+                      .attr("href", "world-map.png")
+                      .attr("width", width)
+                      .attr("height", height);
+
+                  var transparencyFilter = view.append("rect")
+                      .attr("x", 0)
+                      .attr("y", 0)
+                      .attr("fill", "rgba(255,255,255,0.75)")
+                      .attr("width", width)
+                      .attr("height", height);
+
+                  var link = view.append("g")
+                      .attr("class", "links")
+                    .selectAll("line")
+                    .data(graph.links)
+                    .enter().append("line")
+                      .attr("stroke-width", function(d) {
+                        if (d.type == "MAPJUMP") {
+                          return "16";
+                        }
+                        return "16";
+                      })
+                      .attr("stroke", function(d) {
+                        return linkTypeToColorsMap[d.type] || "#9999ff";
+                      });
+
+                  var node = view.append("g")
+                      .attr("class", "nodes")
+                    .selectAll("g")
+                    .data(graph.nodes)
+                    .enter().append("g")
+
+                  var circles = node.append("circle")
+                      .attr("r", function(d) {
+                        return typeToRadiusMap[d.type];
+                      })
+                      .attr("stroke", function(d) {
+                        return typeToBorderColorMap[d.type];
+                      })
+                      .attr("stroke-width", "32")
+                      .attr("fill", function(d) {
+                        return typeToColorsMap[d.type];
+                      })
+                      .call(d3.drag()
+                          .on("start", dragstarted)
+                          .on("drag", dragged)
+                          .on("end", dragended));
+
+                  var labels = node.append("text")
+                      .text(function(d) {
+                        if (d.mapNames && d.mapNames.length > 0 && d.mapNames[0]) {
+                          return d.mapNames[0]; // + " (" + d.fieldName + ")";
+                        }
+                        let codemann8DataName = codemann8Data.fieldMenuNames[d.id];
+                        if (codemann8DataName) {
+                          return codemann8DataName;
+                        }
+                        let wmFieldMenuName = wmFieldMenuNames[d.id];
+                        if (wmFieldMenuName) {
+                          return wmFieldMenuName;
+                        }
+                        return d.fieldName;
+                      })
+                      .attr("fill", function(d) {
+                        return "#777777";
+                      })
+                      .attr('x', 0)
+                      .attr('y', function(d) {
+                        return typeToLabelYMap[d.type];
+                      })
+                      .attr('text-anchor', 'middle')
+                      .attr('alignment-baseline', 'central')
+                      .style('font-size', function(d) {
+                        return typeToFontSizeMap[d.type];
+                      })
+                      ;
+
+                  node.append("title")
+                      .text(function(d) { return d.id; });
+
+                  var simulation = d3.forceSimulation()
+                      .force("link", d3.forceLink().id(function(d) { return d.id; }))
+                      //.force("charge", d3.forceManyBody().strength(function(d) { return -40; }))
+                      //.force("center", d3.forceCenter(width / 2, height / 2))
+                      .force("collide", d3.forceCollide(2 * 32 * customScale))
+                      ;
+
+                  simulation
+                      .nodes(graph.nodes)
+                      .on("tick", ticked);
+
+                  simulation.force("link")
+                      .links(graph.links)
+                      .distance(function(link) {
+                        return 32; // 32
+                      })
+                      .strength(function(link) {
+                        if (link.type == "flashback" || link.type == "debug") {
+                          return 0;
+                        }
+                        if (link.source.id >=1 && link.source.id <= 63) {
+                          return 2;
+                        }
+                        if (link.target.id >=1 && link.target.id <= 63) {
+                          return 2;
+                        }
+                        return 2;
+                      })
+                      ;
+
+                  var xScale = d3.scaleLinear()
+                    .domain([-width / 2, width / 2])
+                    .range([0, width]);
+
+                  var yScale = d3.scaleLinear()
+                    .domain([-height / 2, height / 2])
+                    .range([height, 0]);
+
+                  var zoom = d3.zoom()
+                    .scaleExtent([0.05 / 32, 50 * 32])
+                    .translateExtent([
+                        [-width * 2, -height * 2],
+                        [width * 2, height * 2]
+                    ])
+                    .on("zoom", zoomed);
+
+                  function zoomed() {
+                    currentTransform = d3.event.transform;
+                    view.attr("transform", currentTransform);
+                    console.log("current transform is:", currentTransform);
+                    //gX.call(xAxis.scale(d3.event.transform.rescaleX(xScale)));
+                    //gY.call(yAxis.scale(d3.event.transform.rescaleY(yScale)));
+                  }
+
+                  svg.call(zoom);
+
+                  // set initial zoom/pan
+                  // k: 0.11313144628459001, x: -20410.827744882754, y: -13208.123064812384
+                  //svg.call(zoom.transform, () => d3.zoomIdentity.translate(-6908, -4055).scale(0.0386)); // scale = 0.11312 for Midgar full-size
+                  svg.call(zoom.transform, () => d3.zoomIdentity.translate(94.825, 10.596).scale(0.0034006));
+
+                  function ticked() {
+                    link
+                        .attr("x1", function(d) { return d.source.x; })
+                        .attr("y1", function(d) { return d.source.y; })
+                        .attr("x2", function(d) { return d.target.x; })
+                        .attr("y2", function(d) { return d.target.y; });
+
+                    node
+                        .attr("transform", function(d) {
+                          return "translate(" + d.x + "," + d.y + ")";
+                        })
+                  }
+
+                  function dragstarted(d) {
+                    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                  }
+
+                  function dragged(d) {
+                    d.fx = d3.event.x;
+                    d.fy = d3.event.y;
+                  }
+
+                  function dragended(d) {
+                    if (!d3.event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                  }
+
+                },
+                error: handleErrorGeneric
+              });
+            },
+            error: handleErrorGeneric
+          });
+        },
+        error: handleErrorGeneric
+      });
+    },
+    error: handleErrorGeneric
+  });
+});
+
+
+</script>
