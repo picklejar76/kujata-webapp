@@ -36,19 +36,19 @@ text {
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
 
-var baseUrl = "https://raw.githubusercontent.com/picklejar76";
+var metadataBaseUrl = "https://raw.githubusercontent.com/picklejar76/kujata-data/master/metadata";
 var handleErrorGeneric = function(error) {
   alert('Error!', JSON.stringify(error, null, 2));
 };
 
 $(document).ready(function() {
   $.ajax({
-    url: baseUrl + "/kujata-data/metadata/scene-graph.json",
+    url: metadataBaseUrl + "/scene-graph.json",
     type: "GET",
     success: function(result) {
       var graph = result; // JSON.parse(result);
       $.ajax({
-        url: baseUrl + "/kujata-data/metadata/codemann8-data.json",
+        url: metadataBaseUrl + "/codemann8-data.json",
         type: "GET",
         success: function(result) {
           var codemann8Data = result;
@@ -56,12 +56,12 @@ $(document).ready(function() {
             graph.links.push(link);
           }
           $.ajax({
-            url: baseUrl + "/kujata-data/metadata/field-id-to-world-map-coords.json",
+            url: metadataBaseUrl + "/field-id-to-world-map-coords.json",
             type: "GET",
             success: function(result) {
               var fieldIdToWorldMapCoords = result;
               $.ajax({
-                url: baseUrl + "/kujata-data/metadata/wm-field-menu-names.json",
+                url: metadataBaseUrl + "/wm-field-menu-names.json",
                 type: "GET",
                 success: function(result) {
                   var wmFieldMenuNames = result;
