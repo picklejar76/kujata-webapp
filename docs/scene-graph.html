@@ -118,11 +118,16 @@ $(document).ready(function() {
                     let coordsData = fieldIdToWorldMapCoords[n.id];
                     //console.log(n.id + " coordsData:", coordsData);
                     if (coordsData) {
-                      let row = coordsData.meshX;
-                      let col = coordsData.meshY;
-                      n.fx = (coordsData.meshX * 0x2000 + coordsData.coorX); //  / 32;
-                      n.fy = (coordsData.meshY * 0x2000 + coordsData.coorY); //  / 32;
-                      console.log("set fixed x,y for:", n);
+                      let wmName = wmFieldMenuNames[n.id];
+                      if (wmName && wmName.endsWith("*")) {
+                        console.log("not setting fixed coords for wm node with relative positioning: " + wmName);
+                      } else {
+                        let row = coordsData.meshX;
+                        let col = coordsData.meshY;
+                        n.fx = (coordsData.meshX * 0x2000 + coordsData.coorX); //  / 32;
+                        n.fy = (coordsData.meshY * 0x2000 + coordsData.coorY); //  / 32;
+                        console.log("set fixed x,y for:", n);
+                      }
                     // } else {
                     //   let row = Math.floor((n.id-1) / 8);
                     //   let col = (n.id-1) % 8;
@@ -230,7 +235,9 @@ $(document).ready(function() {
                   };
                   var linkTypeToColorsMap = {
                     "flashback": "rgba(255,255,255,0.1)",
-                    "debug": "rgba(255,255,255,0.1)"
+                    "debug": "rgba(255,255,255,0.1)",
+                    "MAPJUMP": "rgba(255,255,255,0.1)",
+                    "PMJMP": "rgba(255,255,255,0.1)"
                   };
 
                   var mapImage = view.append("image")
@@ -331,16 +338,16 @@ $(document).ready(function() {
                         return 32; // 32
                       })
                       .strength(function(link) {
-                        if (link.type == "flashback" || link.type == "debug") {
+                        if (link.type == "flashback" || link.type == "debug" || link.type == "MAPJUMP" || link.type == "PMJMP") {
                           return 0;
                         }
                         if (link.source.id >=1 && link.source.id <= 63) {
-                          return 2;
+                          return 1;
                         }
                         if (link.target.id >=1 && link.target.id <= 63) {
-                          return 2;
+                          return 1;
                         }
-                        return 2;
+                        return 1;
                       })
                       ;
 
