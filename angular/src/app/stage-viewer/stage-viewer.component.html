@@ -1,0 +1,117 @@
+<div style="background-color:#c0c0c0">
+
+  <div style="padding:16px">
+    <div style="background-color:white; padding:16px; width:400px;">
+      {{status}}
+    </div>
+  </div>
+
+  <div style="height:1em;"></div>
+
+  <div style="display:flex; flex-wrap: wrap;">
+    <div *ngFor="let display of displays" style="width:200px; height:325px; background-color:white; margin:16px 16px 16px 16px;">
+      <div *ngIf="!display.screenshotDataUrl" style="width:200px; height:200px; background-color:#808080" [id]="display.containerId"></div>
+      <div *ngIf="display.screenshotDataUrl" style="width:200px; height:200px; background-color:green">
+        <img [src]="display.screenshotDataUrl" />
+      </div>
+      <div style="width:200px; height:50px">
+        <div style="text-align:center"><b>{{display.skeleton.friendlyName}}</b></div>
+        <!--<div style="text-align:center"><b>{{display.skeleton.friendlyName2}}</b></div>-->
+        <div style="text-align:center">{{display.skeleton.id}} &middot; {{display.skeleton.numBones}} bones</div>
+        <div style="text-align:center; font-size:10pt"><b>{{display.skeleton.name}}</b></div>
+        <div style="text-align:center; font-size:8pt">{{display.skeleton.ifalna?.Names.join(' &middot; ')}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--
+<div id="ff7_scene_container0" style="width:240px; height:240px;">
+</div>
+
+<div id="ff7_scene_container1" style="width:240px; height:240px;">
+</div>
+
+<div id="ff7_scene_container2" style="width:240px; height:240px;">
+</div>
+-->
+
+<ng-container *ngIf="false">
+
+<div *ngIf="database" style="background-color:#e0e0e0">
+
+  <div style="height:1em;"></div>
+
+  <div *ngFor="let i of uniqueBoneCounts" style="background-color:white; margin:8px; padding:8px; border-radius:8px;">
+    <h2 style="margin:auto">Models with {{i}} bones</h2>
+    <div style="display:grid; grid-template-columns: 50% 50%; grid-template-rows: auto auto;">
+      <div style="grid-row:1; grid-column:1/2;">
+        <h3>Field Models</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let skeleton of database.skeletons">
+              <tr *ngIf="skeleton.numBones == i">
+                <td>{{skeleton.id}}</td>
+                <td>{{skeleton.name}}</td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div><!-- end grid cell for models table -->
+      <div style="grid-row:1; grid-column:2/3;">
+        <h3>Field Animations</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>numFrames</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let animation of database.animations">
+              <tr *ngIf="animation.numBones == i">
+                <td>{{animation.id}}</td>
+                <td>{{animation.numFrames}}</td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div><!-- end grid cell for animations table -->
+    </div><!-- end grid container -->
+
+    <div style="height:1em;"></div>
+
+  </div><!-- end looping over bone counts -->
+
+  <!--
+  <h1>Field Animations</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>numBones</th>
+        <th>numFrames</th>
+        <th>rotationOrder</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let animation of database.animations">
+        <td>{{animation.id}}</td>
+        <td>{{animation.numBones}}</td>
+        <td>{{animation.numFrames}}</td>
+        <td>{{animation.rotationOrder}}</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  -->
+
+</div>
+
+</ng-container>

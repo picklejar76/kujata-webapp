@@ -1,0 +1,40 @@
+<div style="background-color:white; padding:16px; margin-bottom:16px;">
+
+  <div style="font-size:20pt; color:#404040;">Field Op Codes</div>
+  <div style="height:16px;"></div>
+
+  <div *ngIf="opMetadata" style="font-size:8pt;">
+    <div *ngFor="let hex of opCodes" class="kujata-font-mono" style="display:inline-block; width:8em">
+      {{hex}}:&nbsp;<a [routerLink]="" (click)="onSelectOpCode(hex)">{{opMetadata[hex].shortName}}</a>
+    </div>
+  </div>
+
+</div>
+
+
+  <div *ngIf="selectedOpCode" style="background-color:white; padding:16px;">
+    <h2>Op Code {{selectedOpCode}}</h2>
+    <h3>Usages</h3>
+
+    <div *ngIf="fetchStatus == 'FETCHING'">
+      <p>Fetching...</p>
+    </div>
+
+    <div *ngIf="fetchStatus == 'ERROR'">
+      <p>Sorry, this app had a problem getting that info.</p>
+    </div>
+
+    <div *ngIf="fetchStatus == 'SUCCESS'">
+      <p><a [routerLink]="" (click)="exportToCsv()">Export To CSV</a></p>
+      <ag-grid-angular
+        [gridOptions]="gridOptions"
+        style="width: 100%; height: 500px;"
+        class="ag-theme-balham"
+        [rowData]="rowData | async"
+        [columnDefs]="columnDefs"
+        >
+      </ag-grid-angular>
+
+    </div>
+
+  </div>

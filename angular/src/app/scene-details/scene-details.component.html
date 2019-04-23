@@ -1,0 +1,157 @@
+<div *ngIf="selectedFieldName" style="background-color:#c0c0c0; padding:16px;">
+
+  <div style="background-color:white; padding:16px; margin-bottom:16px;">
+    <div style="font-size:20pt; color:#404040;">{{selectedFieldName}}</div>
+    <div style="font-size:16pt; color:#808080;">{{selectedFieldMenuName}}</div>
+  </div>
+
+  <div style="width:100%; height:100%; padding:16px; background-color:white;">
+    <div style="font-size:20pt; color:#404040;">Field Links (Experimental)</div>
+    <div style="font-size:16pt; color:#808080;">(Based on Gateway data and Mapjump Ops)</div>
+    <div style="height:16px;"></div>
+    <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; font-size:10pt; background-color:#e0e0e0; padding:16px;">
+      <ng-container *ngFor="let fieldLink of fieldLinks">
+        <div *ngIf="fieldLink.direction == 'inbound'" style="width:200px; height:250px; text-align:center;">
+          <a [routerLink]="'/scene-details/' + fieldLink.sourceName">{{fieldLink.sourceName}}</a><br/>
+          {{fieldLink.sourceFieldMenuName}}<br/>
+          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
+            [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + fieldLink.sourceName + '.png'" />
+        </div>
+      </ng-container>
+      <div style="padding:100px 8px 8px 8px;">&rarr;</div>
+      <ng-container>
+        <div style="width:200px; height:250px; text-align:center; background-color:white; border:solid #555 2px;">
+          <b>{{selectedFieldName}}</b><br/>
+          <b>{{selectedFieldMenuName}}</b><br/>
+          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
+            [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + selectedFieldName + '.png'" />
+        </div>
+      </ng-container>
+      <div style="padding:100px 8px 8px 8px;">&rarr;</div>
+      <ng-container *ngFor="let fieldLink of fieldLinks">
+        <div *ngIf="fieldLink.direction == 'outbound'" style="width:200px; height:250px; text-align:center;">
+          <a [routerLink]="'/scene-details/' + fieldLink.targetName">{{fieldLink.targetName}}</a><br/>
+          {{fieldLink.targetFieldMenuName}}<br/>
+          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
+            [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + fieldLink.targetName + '.png'" />
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <div *ngIf="fetchStatus == 'FETCHING'">
+    <p>Fetching...</p>
+  </div>
+
+  <div *ngIf="fetchStatus == 'ERROR'">
+    <p>Sorry, this app had a problem getting that info.</p>
+  </div>
+
+  <div *ngIf="fetchStatus == 'SUCCESS'">
+
+    <!-- Model Section -->
+    <div style="height:1em"></div>
+    <div *ngFor="let model of [scene.model]" style="background-color:white; padding:16px;">
+      <div style="font-size:20pt; color:#404040;">Model Loader Section</div>
+      <!--<div style="font-size:16pt; color:#808080;">(Scale, Model Loaders)</div>-->
+      <div style="height:16px;"></div>
+      <div>Scale: {{model.header.modelScale}}</div>
+      <div style="height:8px;"></div>
+      <div style="font-weight:bold;">Model Loaders</div>
+      <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; background-color:#e0e0e0; padding:16px; margin-bottom:16px;">
+        <div *ngFor="let loader of model.modelLoaders; index as i" style="font-size:8pt; background-color:white; width:260px; height:450px; padding:16px; margin:0px 16px 16px 0px;">
+          <div *ngFor="let display of [getDisplay(loader.hrcId)]" style="background-color:white; margin:16px 16px 16px 16px;">
+            <div *ngIf="!display.screenshotDataUrl" [style.width.px]="DISPLAY_WIDTH" [style.height.px]="DISPLAY_HEIGHT" style="margin:auto; background-color:#808080" [id]="'model_display_' + i"></div>
+            <div *ngIf="display.screenshotDataUrl" [style.width.px]="DISPLAY_WIDTH" [style.height.px]="DISPLAY_HEIGHT" style="margin:auto; background-color:white">
+              <img [src]="display.screenshotDataUrl" />
+            </div>
+          </div>
+          <div style="font-size:10pt; margin:auto; text-align:center;"><b>{{loader.name}}</b></div>
+          <div style="height:1.0em;"></div>
+          <b>Model:</b>&nbsp;{{loader.hrcId}}
+          &middot;
+          <b>Scale:</b> {{loader.scaleString}}
+          <br/>
+          <div style="font-weight:bold">Lights:</div>
+          <div *ngFor="let light of [loader.light1, loader.light2, loader.light3, loader.globalLight]; index as i">
+            <span style="font-weight:bold">{{ i== 3 ? "G" : (i+1)}}:</span>
+            <span>
+              ( <div [style.backgroundColor]="'rgb(' + light.r + ',' + light.g + ',' + light.b + ')'" style="display:inline-block; width:0.75em; height:0.75em; border:solid #808080 1px"></div> )
+              <!--&nbsp;rgb({{light.r}}, {{light.g}}, {{light.b}})-->
+              <span *ngIf="light.x != undefined">&nbsp;@&nbsp;xyz({{light.x}}, {{light.y}}, {{light.z}})</span>
+            </span>
+          </div>
+          <div style="font-weight:bold">Animations:</div>
+          <span *ngFor="let animation of loader.animations; index as i">
+            <span style="font-weight:bold;">{{i}}:</span>&nbsp;{{animation.substring(0,4)}}
+          </span>
+          <br/>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Triggers/Gateways Section -->
+    <div style="height:1em"></div>
+    <div *ngFor="let triggers of [scene.triggers]" style="background-color:white; padding:16px;">
+      <div style="font-size:20pt; color:#404040;">Triggers/Gateways Section</div>
+      <div style="height:16px;"></div>
+      <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; background-color:#e0e0e0; padding:16px; margin-bottom:16px;">
+        <div *ngFor="let gateway of triggers.gateways" style="font-size:8pt; border:solid #e0e0e0 1px; width:100; height:64; margin-right:16px; margin-bottom:16px; padding:16px; background-color:white;">
+          <div style="font-size:10pt;">
+            <b>From Line:</b>
+              ({{gateway.exitLineVertex1.x}}, {{gateway.exitLineVertex1.y}}, {{gateway.exitLineVertex1.z}}) -
+              ({{gateway.exitLineVertex2.x}}, {{gateway.exitLineVertex2.y}}, {{gateway.exitLineVertex2.z}})
+          </div>
+          <div style="font-size:10pt;">
+            <b>To Map:</b>&nbsp;<a [routerLink]="" (click)="onSelectFieldName(gateway.fieldName)">{{gateway.fieldName}} ({{gateway.fieldId}})</a>
+            &nbsp;
+            <b>Position:</b>&nbsp; ({{gateway.destinationVertex.x}}, {{gateway.destinationVertex.y}}, {{gateway.destinationVertex.z}})
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entities Section -->
+    <div style="height:16px;"></div>
+    <div *ngFor="let entities of [scene.script.entities]" style="background-color:white; padding:16px;">
+      <div style="font-size:20pt; color:#404040;">Entities Section</div>
+      <div style="height:16px;"></div>
+      <div *ngFor="let entity of entities; index as e" style="font-size:8pt; background-color:#e0e0e0; padding:16px; margin-bottom:16px; ">
+        <div style="font-size:14pt; color:#404040;">#{{e}}:
+          <span style="font-size:12pt; color:#808080;">"{{entity.entityName}}"</span>
+        </div>
+        <div style="height:8px;"></div>
+        <div *ngFor="let script of entity.scripts; index as i" style="background-color:white; padding:8px; margin-bottom:8px;">
+          <div><b>script {{script.index}}:</b></div>
+          <div style="height:0.5em"></div>
+          <div *ngFor="let op of script.ops" style="font-size:8pt" class="kujata-font-mono">
+            <div style="display:inline-block; width:24em;">{{op.raw}}</div>
+            <div style="display:inline-block">{{op.description}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:16px;"></div>
+
+  </div><!-- end if fetchStatus == SUCCESS -->
+
+  <div style="height:16px;"></div>
+
+  <ng-container *ngIf="scene">
+    <div *ngFor="let model of [scene.model]" style="background-color:white; padding:16px;">
+      <div style="font-size:20pt; color:#404040;">Entity Script Visualization (Experimental)</div>
+      <div style="height:16px;"></div>
+      <div style="width:100%; height:100%; padding:0; margin:0; background-color:#e0e0e0;">
+        <svg width="100%" height="800" style="margin:0; padding:0; font-family:'Fira Mono', monospace;">
+          <style>
+            text  { font-size: 8pt; }
+            tspan { font-size: 8pt; }
+          </style>
+        </svg>
+      </div>
+    </div>
+  </ng-container>
+
+</div><!-- end if selectedFieldName -->
