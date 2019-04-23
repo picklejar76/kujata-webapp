@@ -19,7 +19,7 @@ export class FieldScenesComponent implements OnInit {
   //public scene;
   private mapList: any[];
   private fieldNameToIdMap: any;
-  private chapters: any[];
+  public chapters: any[];
   private selectedFieldName: string;
   private graph;
   public GRID_X = 150;

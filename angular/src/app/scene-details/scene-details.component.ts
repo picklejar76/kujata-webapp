@@ -21,8 +21,8 @@ export class SceneDetailsComponent implements OnInit {
   private sceneGraph: any = null;
   private fieldIdToFieldMetadataMap: any = null;
   private fieldNameToFieldMetadataMap: any = null;
-  private selectedFieldName: string = null;
-  private selectedFieldMenuName: string = null;
+  public selectedFieldName: string = null;
+  public selectedFieldMenuName: string = null;
   private graph;
   private nodeMap; // map node id to node object in graph
   public GRID_X = 150;
