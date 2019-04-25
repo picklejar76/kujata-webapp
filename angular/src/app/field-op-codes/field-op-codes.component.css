@@ -1,0 +1,49 @@
+.op-cards-container {
+  display:flex;
+  flex-flow:row wrap;
+  align-items:flex-start;
+  align-content:flex-start;
+  font-size:10pt;
+  background-color:#c0c0c0;
+  padding: 16px;
+}
+
+.op-card {
+  width:200px;
+  height:150px;
+  border:solid white 2px;
+  background-color:white;
+  color: #404040;
+  margin:0px 16px 16px 0px;
+  text-align:center;
+  text-decoration:none;
+  padding:4px;
+}
+
+.op-card:hover {
+  background-color:white;
+  border:solid black 2px;
+}
+
+.op-code {
+  display:inline-block;
+  width:60px;
+  padding:8px;
+  background-color:#dd2222;
+  color:white;
+}
+
+.op-short-name {
+  display:inline-block;
+  width:110px;
+  padding:8px;
+  background-color:#808080;
+  color:white;
+}
+
+.op-description {
+  display:inline-block;
+  width:150px;
+  padding:8px;
+  color:#404040;
+}

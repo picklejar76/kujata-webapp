@@ -9,6 +9,7 @@ import { HomeComponent } from './home/home.component';
 import { FieldScenesComponent } from './field-scenes/field-scenes.component';
 import { SceneDetailsComponent } from './scene-details/scene-details.component';
 import { FieldOpCodesComponent } from './field-op-codes/field-op-codes.component';
+import { FieldOpCodeDetailsComponent } from './field-op-code-details/field-op-code-details.component';
 import { ModelViewerComponent } from './model-viewer/model-viewer.component';
 import { StageViewerComponent } from './stage-viewer/stage-viewer.component';
 
@@ -18,6 +19,7 @@ const appRoutes: Routes = [
   { path: 'scene-details/:name', component: SceneDetailsComponent },
   { path: 'stage-viewer', component: StageViewerComponent },
   { path: 'field-op-codes', component: FieldOpCodesComponent },
+  { path: 'field-op-code-details/:hex', component: FieldOpCodeDetailsComponent },
   { path: '**', component: FieldScenesComponent }
 ];
 
@@ -28,6 +30,7 @@ const appRoutes: Routes = [
     FieldScenesComponent,
     SceneDetailsComponent,
     FieldOpCodesComponent,
+    FieldOpCodeDetailsComponent,
     StageViewerComponent,
     ModelViewerComponent
   ],
