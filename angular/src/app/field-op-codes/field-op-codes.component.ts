@@ -10,6 +10,7 @@ import { Observable, of } from 'rxjs';
 })
 export class FieldOpCodesComponent implements OnInit {
 
+  public opCategories = [];
   public opCodes = [];
   public opMetadata;
   public Object = Object; // so the html can call Object.keys()
@@ -18,14 +19,17 @@ export class FieldOpCodesComponent implements OnInit {
   }
 
   ngOnInit() {
-    let url = environment.KUJATA_DATA_BASE_URL + '/metadata/op-metadata.json';
-    this.http.get(url).subscribe(opMetadata => {
-      this.opMetadata = opMetadata;
-      for (let hex of Object.keys(opMetadata)) {
-        this.opCodes.push(hex);
-      }
-      this.opCodes.sort();
-      console.log(this.opCodes);
+    let url = environment.KUJATA_DATA_BASE_URL + '/metadata/op-categories.json';
+    this.http.get<any[]>(url).subscribe(opCategories => {
+      this.opCategories = opCategories;
+      let url = environment.KUJATA_DATA_BASE_URL + '/metadata/op-metadata.json';
+      this.http.get(url).subscribe(opMetadata => {
+        this.opMetadata = opMetadata;
+        for (let hex of Object.keys(opMetadata)) {
+          this.opCodes.push(hex);
+        }
+        this.opCodes.sort();
+      });
     });
   }
 

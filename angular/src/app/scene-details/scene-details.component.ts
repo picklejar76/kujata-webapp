@@ -305,7 +305,7 @@ export class SceneDetailsComponent implements OnInit {
               id:   "op|" + e + "|" + s + "|" + i,
               row: rowIndex,
               col: colIndex++,
-              name: op.description,
+              name: op.js,
               pres: op.pres,
               labelLines: []
             };

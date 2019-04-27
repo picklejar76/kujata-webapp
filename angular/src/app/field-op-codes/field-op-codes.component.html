@@ -1,20 +1,35 @@
 <div style="background-color:white; padding:16px; margin-bottom:16px;">
 
-  <div style="font-size:20pt; color:#404040;">Field Op Codes</div>
+  <div style="font-size:24pt; color:#404040;">Field Op Codes</div>
   <div style="height:16px;"></div>
 
   <div *ngIf="opMetadata" style="font-size:12pt;">
 
-    <div class="op-cards-container">
-      <a *ngFor="let hex of opCodes" class="op-card" [routerLink]="'/field-op-code-details/' + hex">
-        <div style="height:4em">
-          <div class="op-code">0x<b>{{hex}}</b></div>
-          &middot;
-          <div class="op-short-name">{{opMetadata[hex].shortName}}</div>
-        </div>
-        <div style="height:4em">
-          <div class="op-description">op-code description coming soon for {{hex}}</div>
-        </div>
+    <div style="font-size:20pt; color:#404040;">Arranged by Category</div>
+    <div style="height:16px;"></div>
+
+    <div *ngFor="let category of opCategories">
+      <div style="font-size:16pt; color:#404040;">{{category.name}}</div>
+      <div class="op-cards-container">
+        <a *ngFor="let hex of category.opCodes" class="op-card" [routerLink]="'/field-op-code-details/' + hex">
+          <div style="height:4em">
+            <div class="op-code">0x<b>{{hex}}</b></div>
+            <div class="op-short-name">{{opMetadata[hex].shortName}}</div>
+          </div>
+          <div style="height:4em">
+            <div class="op-description">{{opMetadata[hex].description || hex}}</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div style="height:16px;"></div>
+    <div style="font-size:20pt; color:#404040;">All OpCodes in Numerical Order</div>
+    <div style="height:16px;"></div>
+
+    <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; font-size:10pt;"><!--background-color:#c0c0c0;    -->
+      <a *ngFor="let hex of opCodes" style="border:solid white 2px; color: #404040; margin:0px 16px 16px 0px; text-align:center; text-decoration:none; " [routerLink]="'/field-op-code-details/' + hex"><!--background-color:white; -->
+        <div class="op-code">0x<b>{{hex}}</b></div>
       </a>
     </div>
 

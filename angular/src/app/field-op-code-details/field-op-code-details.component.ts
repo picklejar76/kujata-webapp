@@ -26,13 +26,17 @@ export class FieldOpCodeDetailsComponent implements OnInit {
     "scriptIndex": "Script",
     "opIndex": "Line",
     "raw": "Raw",
-    "description": "Translation"
+    "mr": "Makou Reactor translation",
+    "js": "Javascript translation (experimental)",
+    "pres": "Dramatization (experimental)"
   };
   columnWidths = {
     "fieldName": 100,
     "entityName": 100,
     "op": 100,
-    "description": 600
+    "mr": 400,
+    "js": 400,
+    "pres": 400
   };
   public gridOptions;
 
