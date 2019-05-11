@@ -1,0 +1,64 @@
+<div style="background-color:#e0e0e0; padding:16px; margin-bottom:16px;">
+
+  <!--
+  <button (click)="startAnimation()">Start animation</button>
+  <button (click)="stopAnimation()">Stop animation</button>
+  -->
+
+  <div *ngIf="metadata" style="background-color:white; padding:16px;">
+    <h2>HRC ID: {{selectedHrcId}}</h2>
+    <h3>Name: {{friendlyName}}</h3>
+    <h4>Used in {{metadata.numFieldModelLoaders}} field model loaders</h4>
+
+    <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; font-size:12pt;">
+
+      <div class="model-panel">
+        <h4>Model</h4>
+        <div class="scene-container" id="scene-container">
+        </div>
+      </div>
+
+      <div class="animations-panel">
+        <h4>Animations</h4>
+        <div class="animation-category">
+          <h5>Stand</h5>
+          <div *ngFor="let animId of standAnimations" class="animation-box" (click)="onSelectAnimation(animId)">
+            {{animId}} ({{metadata.animationStats.stand[animId]}})
+          </div>
+        </div>
+        <div class="animation-category">
+          <h5>Walk</h5>
+          <div *ngFor="let animId of walkAnimations" class="animation-box" (click)="onSelectAnimation(animId)">
+            {{animId}} ({{metadata.animationStats.walk[animId]}})
+          </div>
+        </div>
+        <div class="animation-category">
+          <h5>Run</h5>
+          <div *ngFor="let animId of runAnimations" class="animation-box" (click)="onSelectAnimation(animId)">
+            {{animId}} ({{metadata.animationStats.run[animId]}})
+          </div>
+        </div>
+        <div class="animation-category">
+          <h5>Other</h5>
+          <div *ngFor="let animId of otherAnimations" class="animation-box" (click)="onSelectAnimation(animId)">
+            {{animId}} ({{metadata.animationStats.other[animId]}})
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; font-size:12pt;">
+
+      <div class="fields-panel">
+        <h4>Fields</h4>
+        <div *ngFor="let fieldName of Object.keys(metadata.fieldStats)" class="field-box">
+          {{fieldName}} ({{metadata.fieldStats[fieldName]}})
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

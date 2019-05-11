@@ -5,11 +5,11 @@ import * as THREE from 'three-full';
 //import * as THREE from 'GLTFLoader';
 
 @Component({
-  selector: 'stage-viewer',
-  templateUrl: './stage-viewer.component.html',
-  styleUrls: ['./stage-viewer.component.css']
+  selector: 'field-models',
+  templateUrl: './field-models.component.html',
+  styleUrls: ['./field-models.component.css']
 })
-export class StageViewerComponent implements OnInit {
+export class FieldModelsComponent implements OnInit {
 
   public environment = environment;
   public database;
@@ -19,9 +19,9 @@ export class StageViewerComponent implements OnInit {
   public boneCountSet: Set<number>;
   // THREE.js objects
   public clock;
-  //public renderer = new THREE.WebGLRenderer();
   public rendererGlobal = new THREE.WebGLRenderer();
   public displays: any[];
+  public isDestroyed = false;
 
   constructor(private http: HttpClient) {
   }
@@ -61,6 +61,11 @@ export class StageViewerComponent implements OnInit {
 
   ngOnChanges(simpleChanges) {
     console.log('simpleChanges:', simpleChanges);
+  }
+
+  ngOnDestroy() {
+    console.log("ngOnDestroy() called");
+    this.isDestroyed = true;
   }
 
   public showDisplay(app, i, delay) {
@@ -109,6 +114,10 @@ export class StageViewerComponent implements OnInit {
 
   private recursiveLoadSkeletonAndAddToDisplay(i) {
     var app = this;
+    if (!app || app.isDestroyed) {
+      console.log("stopping recursive loading");
+      return;
+    }
     if (i >= app.displays.length) {
       this.status = "Finished.";
       return; // stop recursion
@@ -119,6 +128,10 @@ export class StageViewerComponent implements OnInit {
     var gltfLoader = new THREE.GLTFLoader();
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
     gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/field/char.lgp/' + skeleton.id + '.hrc.gltf', function ( gltf ) {
+      if (!app || app.isDestroyed) {
+        console.log("ignoring gltf load() callback");
+        return;
+      }
       //console.log('display:', display);
       let model = gltf.scene;
       let rootNode = model.children[0];

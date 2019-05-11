@@ -3,15 +3,12 @@
   <ng-container *ngIf="chapters">
     <div *ngFor="let chapter of chapters" class="chapter-container">
       <div class="chapter-name">{{chapter.name}}</div>
-      <div class="field-cards-container">
-        <!--<div *ngFor="let fieldName of chapter.fieldNames" class="field-card">-->
+      <div class="field-cards-container" *ngIf="chapter.name != 'Missing'">
         <a *ngFor="let fieldName of chapter.fieldNames" class="field-card" [routerLink]="'/scene-details/' + fieldName">
-          <!--<a [routerLink]="'/scene-details/' + fieldName">-->
           <div class="field-name">{{fieldName}}</div>
           <div class="field-menu-name">{{getMenuName(fieldName)}}</div>
-          <!-- TODO: menu names -->
-          <img class="field-image" [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + fieldName + '.png'" />
-          <!--</a>-->
+          <img *ngIf="fieldName.startsWith('wm')"  class="field-image" [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/world-map/wm0.png'" />
+          <img *ngIf="!fieldName.startsWith('wm')" class="field-image" [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + fieldName + '.png'" />
         </a>
       </div>
     </div>

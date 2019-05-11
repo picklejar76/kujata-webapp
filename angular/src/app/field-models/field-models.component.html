@@ -9,9 +9,9 @@
   <div style="height:1em;"></div>
 
   <div style="display:flex; flex-wrap: wrap;">
-    <div *ngFor="let display of displays" style="width:200px; height:325px; background-color:white; margin:16px 16px 16px 16px;">
-      <div *ngIf="!display.screenshotDataUrl" style="width:200px; height:200px; background-color:#808080" [id]="display.containerId"></div>
-      <div *ngIf="display.screenshotDataUrl" style="width:200px; height:200px; background-color:green">
+    <a *ngFor="let display of displays" class="display-box" [routerLink]="'/field-model-details/' + display.skeleton.id">
+      <div *ngIf="!display.screenshotDataUrl" class="scene-container" [id]="display.containerId"></div>
+      <div *ngIf="display.screenshotDataUrl" class="scene-container">
         <img [src]="display.screenshotDataUrl" />
       </div>
       <div style="width:200px; height:50px">
@@ -21,7 +21,7 @@
         <div style="text-align:center; font-size:10pt"><b>{{display.skeleton.name}}</b></div>
         <div style="text-align:center; font-size:8pt">{{display.skeleton.ifalna?.Names.join(' &middot; ')}}</div>
       </div>
-    </div>
+    </a>
   </div>
 </div>
 

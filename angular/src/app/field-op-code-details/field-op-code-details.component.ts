@@ -21,6 +21,7 @@ export class FieldOpCodeDetailsComponent implements OnInit {
   columnDefs = [];
   rowData = of([]);
   friendlyColumnNames = {
+    "routerLink": "Router Link",
     "fieldName": "Field",
     "entityName": "Entity",
     "scriptIndex": "Script",
@@ -60,6 +61,11 @@ export class FieldOpCodeDetailsComponent implements OnInit {
       this.opMetadata = opMetadata;
       this.initialize();
     });
+    url = environment.KUJATA_DATA_BASE_URL + '/metadata/op-metadata.json';
+    this.http.get(url).subscribe(opMetadata => {
+      this.opMetadata = opMetadata;
+      this.initialize();
+    });
     this.route.paramMap.subscribe(params => {
       this.selectedOpCode = params.get("hex");
       this.initialize();
@@ -67,14 +73,22 @@ export class FieldOpCodeDetailsComponent implements OnInit {
   }
 
   addColumnDef(columnName, width) {
-    this.columnDefs.push({
+    let columnDef = {
       headerName: this.friendlyColumnNames[columnName] || columnName,
       field: columnName,
       width: width,
       sortable: true,
       filter: true,
-      resizable: true
-    });
+      resizable: true,
+      cellRenderer: undefined
+    };
+    if (columnName == "fieldName") {
+      columnDef.cellRenderer = (params) => {
+        // TODO: Find out how to make this a router link
+        return '<a href="/scene-details/' + params.value + '">' + params.value + '</a>';
+      };
+    }
+    this.columnDefs.push(columnDef);
   }
 
   initialize() {
@@ -86,13 +100,18 @@ export class FieldOpCodeDetailsComponent implements OnInit {
       this.gridOptions.api.showLoadingOverlay();
     }
     let url = environment.KUJATA_DATA_BASE_URL + '/metadata/op-code-usages/' + this.selectedOpCode + '.json';
-    this.http.get(url).subscribe(usages => {
+    this.http.get<any[]>(url).subscribe(usages => {
       this.fetchStatus = "SUCCESS";
-      this.usages = usages as any[];
+      this.usages = usages;
+      /*
+      for (let usage of usages) {
+        usage.routerLink = '/scene-details/' + usage.fieldName;
+        this.usages.push(usage);
+      }
+      */
       // set grid data
       this.rowData = of(this.usages);
       this.columnDefs = [];
-      //this.addColumnDefs(["fieldName", "entityName", "scriptIndex", "opIndex", "raw"]);
       if (this.usages.length > 0) {
         let firstRow = this.usages[0];
         for (let columnName of Object.keys(firstRow)) {

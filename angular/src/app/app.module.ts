@@ -10,16 +10,17 @@ import { FieldScenesComponent } from './field-scenes/field-scenes.component';
 import { SceneDetailsComponent } from './scene-details/scene-details.component';
 import { FieldOpCodesComponent } from './field-op-codes/field-op-codes.component';
 import { FieldOpCodeDetailsComponent } from './field-op-code-details/field-op-code-details.component';
-import { ModelViewerComponent } from './model-viewer/model-viewer.component';
-import { StageViewerComponent } from './stage-viewer/stage-viewer.component';
+import { FieldModelDetailsComponent } from './field-model-details/field-model-details.component';
+import { FieldModelsComponent } from './field-models/field-models.component';
 
 const appRoutes: Routes = [
-  { path: 'model-viewer/:id', component: ModelViewerComponent },
   { path: 'field-scenes', component: FieldScenesComponent },
   { path: 'scene-details/:name', component: SceneDetailsComponent },
-  { path: 'stage-viewer', component: StageViewerComponent },
+  { path: 'field-models', component: FieldModelsComponent },
+  { path: 'field-model-details/:hrcId', component: FieldModelDetailsComponent },
   { path: 'field-op-codes', component: FieldOpCodesComponent },
   { path: 'field-op-code-details/:hex', component: FieldOpCodeDetailsComponent },
+  { path: 'stage-viewer', redirectTo: 'field-models' }, // "stage-viewer" was the old name
   { path: '**', component: FieldScenesComponent }
 ];
 
@@ -27,12 +28,12 @@ const appRoutes: Routes = [
   declarations: [
     AppComponent,
     HomeComponent,
+    FieldModelsComponent,
+    FieldModelDetailsComponent,
     FieldScenesComponent,
     SceneDetailsComponent,
     FieldOpCodesComponent,
-    FieldOpCodeDetailsComponent,
-    StageViewerComponent,
-    ModelViewerComponent
+    FieldOpCodeDetailsComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes),
