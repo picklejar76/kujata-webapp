@@ -1,11 +1,11 @@
-<div style="background-color:#e0e0e0; padding:16px; margin-bottom:16px;">
+<div style="background-color:#e0e0e0; padding:4px; margin-bottom:16px;">
 
   <!--
   <button (click)="startAnimation()">Start animation</button>
   <button (click)="stopAnimation()">Stop animation</button>
   -->
 
-  <div *ngIf="metadata" style="background-color:white; padding:16px;">
+  <div *ngIf="metadata" style="background-color:white; padding:4px;">
     <h2>HRC ID: {{selectedHrcId}}</h2>
     <h3>Name: {{friendlyName}}</h3>
     <h4>Used in {{metadata.numFieldModelLoaders}} field model loaders</h4>
@@ -45,10 +45,6 @@
           </div>
         </div>
       </div>
-
-    </div>
-
-    <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; font-size:12pt;">
 
       <div class="fields-panel">
         <h4>Fields</h4>

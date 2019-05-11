@@ -1,7 +1,7 @@
 .kujata-menu {
   background-color:#c0c0c0;
-  margin-bottom:16px;
-  padding:16px;
+  margin-bottom:4px;
+  padding:4px;
   display:flex;
   flex-flow:row wrap;
   align-items:flex-start;
@@ -10,9 +10,9 @@
 }
 
 .kujata-menu-item {
-  background-color:#e0e0e0;
-  margin-right:16px;
-  padding:16px;
+  background-color:white;
+  margin-right:4px;
+  padding:4px;
 }
 
 .kujata-menu-item-text {

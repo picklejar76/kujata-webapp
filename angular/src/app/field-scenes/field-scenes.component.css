@@ -1,7 +1,7 @@
 .chapter-container {
   background-color:#e0e0e0;
-  margin-bottom:16px;
-  padding:16px;
+  margin-bottom:4px;
+  padding:4px;
 }
 
 .chapter-name {
@@ -17,10 +17,10 @@
 }
 
 .field-card {
-  width:200px;
-  height:172px;
+  width:150px;
+  height:180px;
   background-color:#f0f0f0;
-  margin:16px 16px 0px 0px;
+  margin:4px 4px 0px 0px;
   text-align:center;
 }
 
@@ -40,7 +40,7 @@
 }
 
 .field-image {
-  max-width:180px;
+  max-width:120px;
   max-height:120px;
   width:auto;
   height:auto;

@@ -1,7 +1,7 @@
 <div style="background-color:#c0c0c0">
 
-  <div style="padding:16px">
-    <div style="background-color:white; padding:16px; width:400px;">
+  <div style="padding:4px">
+    <div style="background-color:white; padding:4px; width:308px; font-size:10pt;">
       {{status}}
     </div>
   </div>
@@ -14,12 +14,14 @@
       <div *ngIf="display.screenshotDataUrl" class="scene-container">
         <img [src]="display.screenshotDataUrl" />
       </div>
-      <div style="width:200px; height:50px">
+      <div style="height:25px">
         <div style="text-align:center"><b>{{display.skeleton.friendlyName}}</b></div>
         <!--<div style="text-align:center"><b>{{display.skeleton.friendlyName2}}</b></div>-->
         <div style="text-align:center">{{display.skeleton.id}} &middot; {{display.skeleton.numBones}} bones</div>
         <div style="text-align:center; font-size:10pt"><b>{{display.skeleton.name}}</b></div>
+        <!--
         <div style="text-align:center; font-size:8pt">{{display.skeleton.ifalna?.Names.join(' &middot; ')}}</div>
+        -->
       </div>
     </a>
   </div>

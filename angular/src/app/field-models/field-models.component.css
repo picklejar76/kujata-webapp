@@ -1,14 +1,16 @@
 .display-box {
-  width:200px;
-  height:325px;
+  width:150px;
+  height:250px;
   background-color:white;
-  margin:16px 16px 16px 16px;
+  margin:4px 4px 4px 4px;
   color: #404040;
   text-decoration:none;
 }
 
 .scene-container {
-  width:200px;
-  height:200px;
+  width:150px;
+  height:150px;
+  margin:0;
+  padding:0;
   background-color:#808080;
 }

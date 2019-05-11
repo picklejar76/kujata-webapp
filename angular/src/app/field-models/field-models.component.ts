@@ -73,7 +73,7 @@ export class FieldModelsComponent implements OnInit {
       //console.log('showDisplay(), app:', app, 'i:', i);
       let display = app.displays[i];
       display.renderer = app.rendererGlobal; // new THREE.WebGLRenderer();
-      display.renderer.setSize(200, 200);
+      display.renderer.setSize(150, 150);
       //display.renderer.preserveDrawingBuffer = true;
       var containerElement = document.getElementById(display.containerId);
       containerElement.appendChild(display.renderer.domElement);
