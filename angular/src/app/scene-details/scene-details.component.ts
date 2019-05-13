@@ -27,6 +27,8 @@ export class SceneDetailsComponent implements OnInit {
   private nodeMap; // map node id to node object in graph
   public GRID_X = 150;
   public GRID_Y = 75;
+  public PSX_RES_X = 320;
+  public PSX_RES_Y = 224;
   public NODE_SPACE_PROPORTION = 0.80;
   public LABEL_LINE_LENGTH = 18;
   // model visualization stuff
@@ -36,6 +38,11 @@ export class SceneDetailsComponent implements OnInit {
   public displayMap: any = null;
   public displays: any[];
   private clock;
+  public isDestroyed = false;
+  public walkmeshRenderer;
+  public walkmeshScene;
+  public walkmeshCamera;
+  public walkmeshControls;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) {
     console.log("scene-details component constructor");
@@ -70,6 +77,11 @@ export class SceneDetailsComponent implements OnInit {
       this.selectedFieldName = fieldName;
       this.initialize();
     });
+  }
+
+  ngOnDestroy() {
+    console.log("ngOnDestroy() called");
+    this.isDestroyed = true;
   }
 
   private idToMetadata(id) {
@@ -165,9 +177,146 @@ export class SceneDetailsComponent implements OnInit {
         this.buildGraph();
       }, 250);
 
+      this.createWalkmeshDisplay();
+
     }, error => {
       this.fetchStatus = "ERROR";
     });
+  }
+
+  private createWalkmeshDisplay() {
+    console.log("Creating walkmesh display...");
+    var walkmeshContainerElement = document.getElementById("walkmesh-container");
+    if (!walkmeshContainerElement) {
+      console.log("WARN: Could not find walkmeshContainerElement");
+    } else {
+
+      // if this is not our first time here, remove the previous walkmesh display
+      while (walkmeshContainerElement.firstChild) {
+        walkmeshContainerElement.removeChild(walkmeshContainerElement.firstChild);
+      }
+
+      var flevel = this.scene; // TODO: rename this.scene (flevel json) to this.flevel
+      console.log("flevel:", flevel);
+      var ffCamera = flevel.cameraSection.cameras[0]; // TODO: Support multiple cameras
+
+      let fovy = (2 * Math.atan(240.0/(2.0 * ffCamera.zoom))) * 57.29577951;
+
+      this.walkmeshRenderer = new THREE.WebGLRenderer({ antialias: true });
+      this.walkmeshRenderer.setSize(410, 240);
+      this.walkmeshScene = new THREE.Scene();
+      this.walkmeshScene.background = new THREE.Color(0x222222);
+      this.walkmeshCamera = new THREE.PerspectiveCamera(fovy, 410/240, 0.001/4096, 100000/4096);
+
+      let camAxisXx = ffCamera.xAxis.x/4096.0;
+      let camAxisXy = ffCamera.xAxis.y/4096.0;
+      let camAxisXz = ffCamera.xAxis.z/4096.0;
+
+      let camAxisYx = -ffCamera.yAxis.x/4096.0;
+      let camAxisYy = -ffCamera.yAxis.y/4096.0;
+      let camAxisYz = -ffCamera.yAxis.z/4096.0;
+
+      let camAxisZx = ffCamera.zAxis.x/4096.0;
+      let camAxisZy = ffCamera.zAxis.y/4096.0;
+      let camAxisZz = ffCamera.zAxis.z/4096.0;
+
+      let camPosX = ffCamera.position.x/4096.0;
+      let camPosY = -ffCamera.position.y/4096.0;
+      let camPosZ = ffCamera.position.z/4096.0;
+
+      let tx = -(camPosX*camAxisXx + camPosY*camAxisYx + camPosZ*camAxisZx);
+      let ty = -(camPosX*camAxisXy + camPosY*camAxisYy + camPosZ*camAxisZy);
+      let tz = -(camPosX*camAxisXz + camPosY*camAxisYz + camPosZ*camAxisZz);
+
+      // gluLookAt(eyeX, eyeY, eyeZ, centerX,        centerY,        centerZ,        upX,       upY,       upZ)
+      // gluLookAt(tx,   ty,   tz,   tx + camAxisZx, ty + camAxisZy, tz + camAxisZz, camAxisYx, camAxisYy, camAxisYz);
+      this.walkmeshCamera.position.x = tx;
+      this.walkmeshCamera.position.y = ty;
+      this.walkmeshCamera.position.z = tz;
+      this.walkmeshCamera.lookAt(tx + camAxisZx, ty + camAxisZy,  tz + camAxisZz);
+      this.walkmeshCamera.up.set(camAxisYx, camAxisYy, camAxisYz);
+
+      this.walkmeshCamera.updateProjectionMatrix();
+      this.walkmeshScene.add(this.walkmeshCamera);
+      var light = new THREE.DirectionalLight(0xffffff);
+      light.position.set(0, 0, 50).normalize();
+      this.walkmeshScene.add(light);
+      var ambientLight = new THREE.AmbientLight(0x404040); // 0x404040 = soft white light
+      this.walkmeshScene.add(ambientLight);
+
+      let triangles = flevel.walkmeshSection.triangles;
+      let numTriangles = triangles.length;
+      for (let i=0; i<numTriangles; i++) {
+        let triangle = flevel.walkmeshSection.triangles[i];
+        let accessor = flevel.walkmeshSection.accessors[i];
+        var v0 = new THREE.Vector3(triangle.vertices[0].x/4096, triangle.vertices[0].y/4096, triangle.vertices[0].z/4096);
+        var v1 = new THREE.Vector3(triangle.vertices[1].x/4096, triangle.vertices[1].y/4096, triangle.vertices[1].z/4096);
+        var v2 = new THREE.Vector3(triangle.vertices[2].x/4096, triangle.vertices[2].y/4096, triangle.vertices[2].z/4096);
+        var addLine = function(scene, va, vb, acc) {
+          var lineColor = (acc == -1 ? 0x4488cc : 0x888888);
+          var material1 = new THREE.LineBasicMaterial({ color: lineColor } );
+          var geometry1 = new THREE.Geometry();
+          geometry1.vertices.push(va);
+          geometry1.vertices.push(vb);
+          var line = new THREE.Line(geometry1, material1);
+          scene.add( line );
+        }
+        addLine(this.walkmeshScene, v0, v1, accessor[0]);
+        addLine(this.walkmeshScene, v1, v2, accessor[1]);
+        addLine(this.walkmeshScene, v2, v0, accessor[2]);
+      }
+
+      // draw gateways
+      for (let gateway of flevel.triggers.gateways) {
+        var lv0 = gateway.exitLineVertex1;
+        var lv1 = gateway.exitLineVertex2;
+        var v0 = new THREE.Vector3(lv0.x/4096, lv0.y/4096, lv0.z/4096);
+        var v1 = new THREE.Vector3(lv1.x/4096, lv1.y/4096, lv1.z/4096);
+        var material1 = new THREE.LineBasicMaterial({ color: 0xff0000 } );
+        var geometry1 = new THREE.Geometry();
+        geometry1.vertices.push(v0);
+        geometry1.vertices.push(v1);
+        var line = new THREE.Line(geometry1, material1);
+        this.walkmeshScene.add( line );
+      }
+
+      this.walkmeshControls = new THREE.OrbitControls(this.walkmeshCamera, this.walkmeshRenderer.domElement);
+      this.walkmeshControls.target = new THREE.Vector3(tx + camAxisZx, ty + camAxisZy,  tz + camAxisZz);
+      this.walkmeshControls.panSpeed = 1/4;
+      this.walkmeshControls.rotateSpeed = 1/4;
+      this.walkmeshControls.zoomSpeed = 1/4;
+      this.walkmeshControls.update();
+
+      walkmeshContainerElement.appendChild(this.walkmeshRenderer.domElement);
+      this.walkmeshRenderer.render(this.walkmeshScene, this.walkmeshCamera);
+      var app = this;
+      var walkmeshTick = function() {
+        if (!app || app.isDestroyed) {
+          console.log("stopping walkmeshTick()");
+          return;
+        }
+        // Note: Even if app.isAnimationEnabled == false, we must still
+        // keep calling appTick(), to let the OrbitControls adjust the
+        // camera if the user moves it.
+        requestAnimationFrame(walkmeshTick);
+        var delta = app.clock.getDelta();
+        if (app.walkmeshControls) {
+          app.walkmeshControls.update(delta);
+        }
+        /*
+        if (app.mixer) {
+          if (app.isAnimationEnabled) {
+            app.mixer.update(delta);
+          }
+        }
+        */
+        if (app.walkmeshRenderer && app.walkmeshScene && app.walkmeshCamera) {
+          app.walkmeshRenderer.render(app.walkmeshScene, app.walkmeshCamera);
+        }
+      }
+
+      walkmeshTick();
+    }
   }
 
   private createEmptyDisplay(skeleton, containerId, width, height) {
@@ -189,7 +338,7 @@ export class SceneDetailsComponent implements OnInit {
     // display.camera.position.x = 0;
     // display.camera.position.y = 13.53;
     // display.camera.position.z = 50;
-    display.camera.position.x = -40;
+    display.camera.position.x = 0;
     display.camera.position.y = 13.53 + 20;
     display.camera.position.z = 60;
     display.camera.lookAt(new THREE.Vector3(0,13.53,0));

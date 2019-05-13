@@ -191,10 +191,8 @@ export class FieldModelDetailsComponent implements OnInit {
       app.scene.add(ambientLight);
 
       // add ground
-      ////var geometry = new THREE.PlaneGeometry(100, 100, 2, 2);
       var material = new THREE.MeshBasicMaterial({color: 0x33bb55, opacity: 1.0, side: THREE.DoubleSide});
       var geometry = new THREE.CircleGeometry( 50, 32 );
-      ////var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
       var plane = new THREE.Mesh(geometry, material);
       plane.rotateX(-Math.PI/2);
       app.scene.add(plane);

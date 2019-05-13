@@ -1,43 +1,34 @@
-<div *ngIf="selectedFieldName" style="background-color:#c0c0c0; padding:16px;">
+<div *ngIf="selectedFieldName" style="background-color:#c0c0c0; padding:4px;">
 
-  <div style="background-color:white; padding:16px; margin-bottom:16px;">
+  <div style="background-color:white; padding:4px; margin-bottom:4px;">
     <div style="font-size:20pt; color:#404040;">{{selectedFieldName}}</div>
     <div style="font-size:16pt; color:#808080;">{{selectedFieldMenuName}}</div>
   </div>
 
-  <div style="width:100%; height:100%; padding:16px; background-color:white;">
-    <div style="font-size:20pt; color:#404040;">Field Links (Experimental)</div>
-    <div style="font-size:16pt; color:#808080;">(Based on Gateway data and Mapjump Ops)</div>
-    <div style="height:16px;"></div>
+  <div style="background-color:white; padding:4px; margin-bottom:4px;">
     <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; font-size:10pt; background-color:#e0e0e0; padding:16px;">
-      <ng-container *ngFor="let fieldLink of fieldLinks">
-        <div *ngIf="fieldLink.direction == 'inbound'" style="width:200px; height:250px; text-align:center;">
-          <a [routerLink]="'/scene-details/' + fieldLink.sourceName">{{fieldLink.sourceName}}</a><br/>
-          {{fieldLink.sourceFieldMenuName}}<br/>
-          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
-            [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + fieldLink.sourceName + '.png'" />
-        </div>
-      </ng-container>
-      <div style="padding:100px 8px 8px 8px;">&rarr;</div>
-      <ng-container>
-        <div style="width:200px; height:250px; text-align:center; background-color:white; border:solid #555 2px;">
-          <b>{{selectedFieldName}}</b><br/>
-          <b>{{selectedFieldMenuName}}</b><br/>
-          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
+      <div style="width:410px">
+        <div style="font-size:12pt; text-align:center">Background</div>
+        <div style="width:410px; height:240px; background-color:#222222; text-align:center">
+          <img style="display:inline-block; max-width:410px; max-height:240px; width:auto; height:auto; padding:0px; margin:0;"
             [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + selectedFieldName + '.png'" />
         </div>
-      </ng-container>
-      <div style="padding:100px 8px 8px 8px;">&rarr;</div>
-      <ng-container *ngFor="let fieldLink of fieldLinks">
-        <div *ngIf="fieldLink.direction == 'outbound'" style="width:200px; height:250px; text-align:center;">
-          <a [routerLink]="'/scene-details/' + fieldLink.targetName">{{fieldLink.targetName}}</a><br/>
-          {{fieldLink.targetFieldMenuName}}<br/>
-          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
-            [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + fieldLink.targetName + '.png'" />
+      </div>
+      <div style="width:4px">
+      </div>
+      <div>
+        <div style="font-size:12pt; text-align:center">Walkmesh</div>
+        <div id="walkmesh-container" style="display:inline-block; width:410px; height:240px; background-color:#222222; padding:0px;">
         </div>
-      </ng-container>
+      </div>
+      <!--
+      <div style="width:410px; height:240px; background-color:#222222; text-align:center">
+      </div>
+      -->
     </div>
   </div>
+
+
 
   <div *ngIf="fetchStatus == 'FETCHING'">
     <p>Fetching...</p>
@@ -136,6 +127,42 @@
     <div style="height:16px;"></div>
 
   </div><!-- end if fetchStatus == SUCCESS -->
+
+  <div style="height:16px;"></div>
+
+  <div style="width:100%; height:100%; padding:16px; background-color:white;">
+    <div style="font-size:20pt; color:#404040;">Field Links (Experimental)</div>
+    <div style="font-size:16pt; color:#808080;">(Based on Gateway data and Mapjump Ops)</div>
+    <div style="height:16px;"></div>
+    <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; font-size:10pt; background-color:#e0e0e0; padding:16px;">
+      <ng-container *ngFor="let fieldLink of fieldLinks">
+        <div *ngIf="fieldLink.direction == 'inbound'" style="width:200px; height:250px; text-align:center;">
+          <a [routerLink]="'/scene-details/' + fieldLink.sourceName">{{fieldLink.sourceName}}</a><br/>
+          {{fieldLink.sourceFieldMenuName}}<br/>
+          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
+            [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + fieldLink.sourceName + '.png'" />
+        </div>
+      </ng-container>
+      <div style="padding:100px 8px 8px 8px;">&rarr;</div>
+      <ng-container>
+        <div style="width:200px; height:250px; text-align:center; background-color:white; border:solid #555 2px;">
+          <b>{{selectedFieldName}}</b><br/>
+          <b>{{selectedFieldMenuName}}</b><br/>
+          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
+            [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + selectedFieldName + '.png'" />
+        </div>
+      </ng-container>
+      <div style="padding:100px 8px 8px 8px;">&rarr;</div>
+      <ng-container *ngFor="let fieldLink of fieldLinks">
+        <div *ngIf="fieldLink.direction == 'outbound'" style="width:200px; height:250px; text-align:center;">
+          <a [routerLink]="'/scene-details/' + fieldLink.targetName">{{fieldLink.targetName}}</a><br/>
+          {{fieldLink.targetFieldMenuName}}<br/>
+          <img style="max-width:200px; max-height:200px; width:auto; height:auto;"
+            [src]="environment.KUJATA_DATA_BASE_URL + '/metadata/makou-reactor/backgrounds/' + fieldLink.targetName + '.png'" />
+        </div>
+      </ng-container>
+    </div>
+  </div>
 
   <div style="height:16px;"></div>
 
