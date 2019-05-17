@@ -34,7 +34,7 @@ export class SceneDetailsComponent implements OnInit {
   // model visualization stuff
   public DISPLAY_WIDTH = 100;
   public DISPLAY_HEIGHT = 100;
-  public rendererGlobal = new THREE.WebGLRenderer();
+  public rendererGlobal = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   public displayMap: any = null;
   public displays: any[];
   private clock;
@@ -202,7 +202,7 @@ export class SceneDetailsComponent implements OnInit {
 
       let fovy = (2 * Math.atan(240.0/(2.0 * ffCamera.zoom))) * 57.29577951;
 
-      this.walkmeshRenderer = new THREE.WebGLRenderer({ antialias: true });
+      this.walkmeshRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       this.walkmeshRenderer.setSize(410, 240);
       this.walkmeshScene = new THREE.Scene();
       this.walkmeshScene.background = new THREE.Color(0x222222);

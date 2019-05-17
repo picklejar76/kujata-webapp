@@ -19,7 +19,7 @@ export class FieldModelsComponent implements OnInit {
   public boneCountSet: Set<number>;
   // THREE.js objects
   public clock;
-  public rendererGlobal = new THREE.WebGLRenderer();
+  public rendererGlobal = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   public displays: any[];
   public isDestroyed = false;
 

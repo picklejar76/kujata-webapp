@@ -1,0 +1,46 @@
+<div style="background-color:#e0e0e0; padding:4px; margin-bottom:16px;">
+
+  <!--
+  <button (click)="startAnimation()">Start animation</button>
+  <button (click)="stopAnimation()">Stop animation</button>
+  -->
+
+  <div *ngIf="selectedHrcId" style="background-color:white; padding:4px;">
+    <h2>HRC ID: {{selectedHrcId}}</h2>
+    <!--
+    <h3>Name: {{friendlyName}}</h3>
+    <h4>Used in {{metadata.numFieldModelLoaders}} field model loaders</h4>
+    -->
+
+    <div style="display:flex; flex-flow:row wrap; align-items:flex-start; align-content:flex-start; font-size:12pt;">
+
+      <div class="model-panel">
+        <h4>Model</h4>
+        <div class="scene-container" id="scene-container">
+        </div>
+      </div>
+
+      <div class="animations-panel">
+        <h4>Animations</h4>
+        <div class="animation-category">
+          <h5>Body Animations</h5>
+          <div *ngFor="let animId of bodyAnimationIds" class="animation-box" (click)="onSelectAnimation(animId)">
+            {{animId}} {{bodyAnimationIdToFriendlyNameMap[animId]}}
+          </div>
+        </div>
+      </div>
+
+      <!--
+      <div class="fields-panel">
+        <h4>Fields</h4>
+        <div *ngFor="let fieldName of Object.keys(metadata.fieldStats)" class="field-box">
+          {{fieldName}} ({{metadata.fieldStats[fieldName]}})
+        </div>
+      </div>
+      -->
+
+    </div>
+
+  </div>
+
+</div>

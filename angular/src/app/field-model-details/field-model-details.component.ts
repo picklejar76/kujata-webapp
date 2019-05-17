@@ -89,7 +89,7 @@ export class FieldModelDetailsComponent implements OnInit {
     this.selectedAnimId = this.standAnimations[0];
 
     this.clock = new THREE.Clock();
-    this.renderer = new THREE.WebGLRenderer({ alpha: true });
+    this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     this.renderer.setSize(this.SCENE_WIDTH, this.SCENE_HEIGHT);
 
     // clear these variables in case a user re-visits this page after leaving it
