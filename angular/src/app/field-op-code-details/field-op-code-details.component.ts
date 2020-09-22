@@ -1,6 +1,6 @@
 import { environment } from '../../environments/environment';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 
@@ -41,7 +41,7 @@ export class FieldOpCodeDetailsComponent implements OnInit {
   };
   public gridOptions;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {
+  constructor(private route: ActivatedRoute, private router: Router, private http: HttpClient) {
   }
 
   ngOnInit() {
@@ -50,9 +50,9 @@ export class FieldOpCodeDetailsComponent implements OnInit {
       columnDefs: this.columnDefs,
       //pagination: true,
       rowSelection: 'single',
-      onRowClicked: function(event) { console.log('a row was clicked'); },
-      onColumnResized: function(event) { console.log('a column was resized'); },
-      onGridReady: function(event) { console.log('the grid is now ready'); },
+      onRowClicked: function (event) { console.log('a row was clicked'); },
+      onColumnResized: function (event) { console.log('a column was resized'); },
+      onGridReady: function (event) { console.log('the grid is now ready'); },
       //noRowsToShow: ""
       suppressNoRowsOverlay: true
     }
@@ -80,13 +80,18 @@ export class FieldOpCodeDetailsComponent implements OnInit {
       sortable: true,
       filter: true,
       resizable: true,
-      cellRenderer: undefined
+      onCellClicked: undefined,
+      cellStyle: undefined
     };
     if (columnName == "fieldName") {
-      columnDef.cellRenderer = (params) => {
-        // TODO: Find out how to make this a router link
-        return '<a href="/scene-details/' + params.value + '">' + params.value + '</a>';
-      };
+      columnDef.onCellClicked = (params) => {
+        this.router.navigateByUrl('/scene-details/' + params.value)
+      }
+      columnDef.cellStyle = {
+        color: '#007bff',
+        textDecoration: 'underline',
+        cursor: 'pointer'
+      }
     }
     this.columnDefs.push(columnDef);
   }
