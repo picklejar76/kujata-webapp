@@ -98,8 +98,8 @@ export class BattleModelDetailsComponent implements OnInit {
     this.http.get(this.BATTLE_LGP_BASE_URL + this.selectedHrcId + '.hrc.gltf').subscribe(modelGLTF => {
       this.modelGLTF = modelGLTF;
       this.bodyAnimationNames = [];
-      for (let i = 0; i < modelGLTF.animations.length; i++) {
-        let bodyAnimation = modelGLTF.animations[i];
+      for (let i = 0; i < modelGLTF['animations'].length; i++) {
+        let bodyAnimation = modelGLTF['animations'][i];
         let bodyAnimationId = bodyAnimation.name;
         this.bodyAnimationIds.push(bodyAnimationId);
         this.bodyAnimationIdToIndexMap[bodyAnimationId] = i;
