@@ -13,6 +13,7 @@ export class FieldOpCodeDetailsComponent implements OnInit {
 
   public opMetadata;
   public selectedOpCode = null;
+  public selectedOpDescription = '...loading...';
   public selectedOpMetadata = null;
   public usages = [];
   public fetchStatus = "NONE"; // NONE, FETCHING, SUCCESS, ERROR
@@ -100,6 +101,7 @@ export class FieldOpCodeDetailsComponent implements OnInit {
     if (!this.opMetadata) { return; }
     if (!this.selectedOpCode) { return; }
     this.selectedOpMetadata = this.opMetadata[this.selectedOpCode];
+    this.selectedOpDescription = `${this.selectedOpMetadata.shortName} - ${this.selectedOpMetadata.description}`
     this.fetchStatus = "FETCHING";
     if (this.gridOptions.api) {
       this.gridOptions.api.showLoadingOverlay();
