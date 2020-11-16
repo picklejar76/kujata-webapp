@@ -1,0 +1,25 @@
+<div style="background-color:#e0e0e0; padding:16px; margin-bottom:16px;">
+
+  <div style="background-color:white; padding:16px;">
+    <h2>Sound Details</h2>
+    <h3>Usages</h3>
+
+    <div *ngIf="fetchStatus == 'FETCHING'">
+      <p>Fetching...</p>
+    </div>
+
+    <div *ngIf="fetchStatus == 'ERROR'">
+      <p>Sorry, this app had a problem getting that info.</p>
+    </div>
+
+    <div *ngIf="fetchStatus == 'SUCCESS'">
+      <p><a [routerLink]="" (click)="exportToCsv()">Export To CSV</a></p>
+      <ag-grid-angular [gridOptions]="gridOptions" style="width: 100%; height: 500px;" class="ag-theme-balham"
+        [rowData]="rowData | async" [columnDefs]="columnDefs">
+      </ag-grid-angular>
+
+    </div>
+
+  </div>
+
+</div>
