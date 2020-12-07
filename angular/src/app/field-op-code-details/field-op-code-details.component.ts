@@ -82,17 +82,11 @@ export class FieldOpCodeDetailsComponent implements OnInit {
       filter: true,
       resizable: true,
       onCellClicked: undefined,
-      cellStyle: undefined
+      cellStyle: undefined,
+      cellRenderer: undefined
     };
     if (columnName == "fieldName") {
-      columnDef.onCellClicked = (params) => {
-        this.router.navigateByUrl('/scene-details/' + params.value)
-      }
-      columnDef.cellStyle = {
-        color: '#007bff',
-        textDecoration: 'underline',
-        cursor: 'pointer'
-      }
+      columnDef.cellRenderer = (params) => { return `<a href="/scene-details/${params.value}">${params.value}</a>` }
     }
     this.columnDefs.push(columnDef);
   }
