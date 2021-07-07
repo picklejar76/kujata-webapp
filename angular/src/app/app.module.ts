@@ -13,6 +13,7 @@ import { FieldOpCodeDetailsComponent } from './field-op-code-details/field-op-co
 import { FieldModelsComponent } from './field-models/field-models.component';
 import { FieldModelDetailsComponent } from './field-model-details/field-model-details.component';
 import { BattleModelDetailsComponent } from './battle-model-details/battle-model-details.component';
+import { SoundDetailsComponent } from './sound-details/sound-details.component'
 
 const appRoutes: Routes = [
   { path: 'field-scenes', component: FieldScenesComponent },
@@ -22,6 +23,7 @@ const appRoutes: Routes = [
   { path: 'battle-model-details/:hrcId', component: BattleModelDetailsComponent },
   { path: 'field-op-codes', component: FieldOpCodesComponent },
   { path: 'field-op-code-details/:hex', component: FieldOpCodeDetailsComponent },
+  { path: 'sounds', component: SoundDetailsComponent },
   { path: 'stage-viewer', redirectTo: 'field-models' }, // "stage-viewer" was the old name
   { path: '**', component: FieldScenesComponent }
 ];
@@ -36,7 +38,8 @@ const appRoutes: Routes = [
     FieldScenesComponent,
     SceneDetailsComponent,
     FieldOpCodesComponent,
-    FieldOpCodeDetailsComponent
+    FieldOpCodeDetailsComponent,
+    SoundDetailsComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes),
