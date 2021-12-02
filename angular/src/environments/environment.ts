@@ -4,9 +4,9 @@
 
 export const environment = {
   production: false,
-  KUJATA_DATA_BASE_URL: "http://localhost:8080" //"http://localhost:3000/kujata-data" // from "C:\opt\kujata-data" run "http-server . -p 8080"
-  //KUJATA_DATA_BASE_URL: "https://raw.githubusercontent.com/picklejar76/kujata-data/master"
-};
+  KUJATA_DATA_BASE_URL: 'http://localhost:3000/kujata-data' // "http://localhost:3000/kujata-data" // from "C:\opt\kujata-data" run "http-server . -p 8080"
+  // KUJATA_DATA_BASE_URL: "https://raw.githubusercontent.com/picklejar76/kujata-data/master"
+}
 
 /*
  * For easier debugging in development mode, you can import the following file

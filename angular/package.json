@@ -25,6 +25,7 @@
     "angular-cli-ghpages": "^0.6.2",
     "core-js": "^2.5.4",
     "d3": "^5.9.2",
+    "node-sass": "^4.14.1",
     "rxjs": "~6.3.3",
     "three": "^0.102.1",
     "three-full": "^17.1.0",
