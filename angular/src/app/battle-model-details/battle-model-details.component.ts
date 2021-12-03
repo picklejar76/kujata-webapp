@@ -4,6 +4,7 @@ import { ActivatedRoute } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import * as THREE from 'three-full';
+import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 @Component({
   selector: 'battle-model-details',
@@ -156,7 +157,7 @@ export class BattleModelDetailsComponent implements OnInit {
 
     var gltfLoader = new THREE.GLTFLoader();
     gltfLoader.parse(JSON.stringify(combinedGLTF), app.BATTLE_LGP_BASE_URL, function (gltf) {
-
+      addBlendingToMaterials(gltf)
       console.log("parsed gltf:", gltf);
 
       ////let modelHeight = gltf.nodes[1].translation[1];

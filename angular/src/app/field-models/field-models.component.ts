@@ -3,6 +3,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import * as THREE from 'three-full';
 //import * as THREE from 'GLTFLoader';
+import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 @Component({
   selector: 'field-models',
@@ -38,7 +39,7 @@ export class FieldModelsComponent implements OnInit {
           this.clock = new THREE.Clock();
           let skeletonsToLoad = this.database.skeletons;
           var app = this;
-          for (var i=0; i<skeletonsToLoad.length; i++) { // skeletonsToLoad.length;
+          for (var i = 0; i < skeletonsToLoad.length; i++) { // skeletonsToLoad.length;
             var skeleton = skeletonsToLoad[i];
             skeleton.friendlyName = skeletonFriendlyNames[skeleton.id.toLowerCase()];
             //skeleton.friendlyName2 = skeletonFriendlyNames2[skeleton.id.toLowerCase()];
@@ -70,18 +71,18 @@ export class FieldModelsComponent implements OnInit {
 
   public showDisplay(app, i, delay) {
     //setTimeout(() => {
-      //console.log('showDisplay(), app:', app, 'i:', i);
-      let display = app.displays[i];
-      display.renderer = app.rendererGlobal; // new THREE.WebGLRenderer();
-      display.renderer.setSize(150, 150);
-      //display.renderer.preserveDrawingBuffer = true;
-      var containerElement = document.getElementById(display.containerId);
-      containerElement.appendChild(display.renderer.domElement);
-      display.renderer.render(display.scene, display.camera);
-      display.screenshotDataUrl = display.renderer.domElement.toDataURL();
-      display.renderer.dispose();
-      display.renderer = null;
-      //console.log('done, display.screenshotDataUrl:', display.screenshotDataUrl);
+    //console.log('showDisplay(), app:', app, 'i:', i);
+    let display = app.displays[i];
+    display.renderer = app.rendererGlobal; // new THREE.WebGLRenderer();
+    display.renderer.setSize(150, 150);
+    //display.renderer.preserveDrawingBuffer = true;
+    var containerElement = document.getElementById(display.containerId);
+    containerElement.appendChild(display.renderer.domElement);
+    display.renderer.render(display.scene, display.camera);
+    display.screenshotDataUrl = display.renderer.domElement.toDataURL();
+    display.renderer.dispose();
+    display.renderer = null;
+    //console.log('done, display.screenshotDataUrl:', display.screenshotDataUrl);
     //}, delay);
   }
 
@@ -91,7 +92,7 @@ export class FieldModelsComponent implements OnInit {
       containerId: containerId,
       skeleton: skeleton,
       scene: new THREE.Scene(),
-      camera: new THREE.PerspectiveCamera(75, width/height, 0.1, 1000),
+      camera: new THREE.PerspectiveCamera(75, width / height, 0.1, 1000),
       renderer: null // new THREE.WebGLRenderer()
     };
     display.containerId = containerId;
@@ -107,7 +108,7 @@ export class FieldModelsComponent implements OnInit {
     display.camera.position.x = 0;
     display.camera.position.y = 13.53;
     display.camera.position.z = 50;
-    display.camera.rotation.x = 0 * Math.PI/180.0;
+    display.camera.rotation.x = 0 * Math.PI / 180.0;
 
     return display;
   }
@@ -127,11 +128,12 @@ export class FieldModelsComponent implements OnInit {
     this.status = "Loading skeleton model " + skeleton.id + ' (' + skeleton.name + ')...';
     var gltfLoader = new THREE.GLTFLoader();
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
-    gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/field/char.lgp/' + skeleton.id + '.hrc.gltf', function ( gltf ) {
+    gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/field/char.lgp/' + skeleton.id + '.hrc.gltf', function (gltf) {
       if (!app || app.isDestroyed) {
         console.log("ignoring gltf load() callback");
         return;
       }
+      addBlendingToMaterials(gltf)
       //console.log('display:', display);
       let model = gltf.scene;
       let rootNode = model.children[0];
@@ -146,12 +148,12 @@ export class FieldModelsComponent implements OnInit {
       //console.log('skeleton has been added to display:', skeleton);
       app.showDisplay(app, i, 10);
       //setTimeout(() => {
-        app.recursiveLoadSkeletonAndAddToDisplay(i + 1);
+      app.recursiveLoadSkeletonAndAddToDisplay(i + 1);
       //}, 10);
-    }, undefined, function ( error ) {
-      console.error( 'oops!', error );
+    }, undefined, function (error) {
+      console.error('oops!', error);
       //setTimeout(() => {
-        app.recursiveLoadSkeletonAndAddToDisplay(i + 1);
+      app.recursiveLoadSkeletonAndAddToDisplay(i + 1);
       //}, 10);
     });
   }
@@ -180,7 +182,7 @@ export class FieldModelsComponent implements OnInit {
     this.boneCountSet.forEach((value) => {
       this.uniqueBoneCounts.push(value);
     });
-    this.uniqueBoneCounts.sort((c1,c2) => { return c1<c2 ? -1 : c1>c2 ? 1 : 0; });
+    this.uniqueBoneCounts.sort((c1, c2) => { return c1 < c2 ? -1 : c1 > c2 ? 1 : 0; });
   }
 
   /*

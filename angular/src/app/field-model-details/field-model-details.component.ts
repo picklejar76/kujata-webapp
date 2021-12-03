@@ -4,6 +4,7 @@ import { ActivatedRoute } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import * as THREE from 'three-full';
+import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 @Component({
   selector: 'field-model-details',
@@ -75,7 +76,7 @@ export class FieldModelDetailsComponent implements OnInit {
     this.walkAnimations = Object.keys(this.metadata.animationStats.walk);
     this.runAnimations = Object.keys(this.metadata.animationStats.run);
     this.otherAnimations = Object.keys(this.metadata.animationStats.other);
-    var statSortFunction = function(statMap) {
+    var statSortFunction = function (statMap) {
       return (a1, a2) => {
         return statMap[a2] - statMap[a1];
       };
@@ -97,24 +98,24 @@ export class FieldModelDetailsComponent implements OnInit {
     this.modelGLTF = null;
     this.gltf = null;
     this.scene = null;
-    this.camera = new THREE.PerspectiveCamera(90, this.SCENE_WIDTH/this.SCENE_HEIGHT, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(90, this.SCENE_WIDTH / this.SCENE_HEIGHT, 0.1, 1000);
     this.camera.position.x = 0;
     this.camera.position.y = 0; // 13.53
     this.camera.position.z = 50;
-    this.camera.rotation.x = 0 * Math.PI/180.0;
+    this.camera.rotation.x = 0 * Math.PI / 180.0;
 
     this.controls = null;
 
     this.http.get(this.CHAR_BASE_URL + this.selectedHrcId + '.hrc.gltf').subscribe(modelGLTF => {
       this.modelGLTF = modelGLTF;
       this.fetchAnimationAndInitializeScene();
-    }, function ( error ) {
-      console.error( 'oops!', error );
+    }, function (error) {
+      console.error('oops!', error);
     }); // end http get modelGLTF
 
     var app = this;
 
-    var appTick = function() {
+    var appTick = function () {
       if (!app || app.isDestroyed) {
         console.log("stopping appTick()");
         return;
@@ -149,8 +150,8 @@ export class FieldModelDetailsComponent implements OnInit {
     this.http.get(this.CHAR_BASE_URL + this.selectedAnimId + '.a.gltf').subscribe(animGLTF => {
       var combinedGLTF = this.createCombinedGLTF(this.modelGLTF, animGLTF);
       this.initializeSceneWithCombinedGLTF(this, combinedGLTF);
-    }, function ( error ) {
-      console.error( 'oops!', error );
+    }, function (error) {
+      console.error('oops!', error);
     }); // end http get animGLTF
   }
 
@@ -160,16 +161,16 @@ export class FieldModelDetailsComponent implements OnInit {
       modelRootHeight = 15.0;
     }
     if (app.camera.position.y == 0) {
-      console.log("setting camera height to:" + modelRootHeight*2);
-      app.camera.position.y = modelRootHeight*2;
-      app.camera.position.z = Math.max(modelRootHeight*3, 50);
+      console.log("setting camera height to:" + modelRootHeight * 2);
+      app.camera.position.y = modelRootHeight * 2;
+      app.camera.position.z = Math.max(modelRootHeight * 3, 50);
     }
 
     console.log("modelRootHeight=" + modelRootHeight);
     var gltfLoader = new THREE.GLTFLoader();
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
     gltfLoader.parse(JSON.stringify(combinedGLTF), app.CHAR_BASE_URL, function (gltf) {
-
+      addBlendingToMaterials(gltf)
       console.log("combined gltf:", gltf);
       ////let modelHeight = gltf.nodes[1].translation[1];
       app.gltf = gltf;
@@ -191,10 +192,10 @@ export class FieldModelDetailsComponent implements OnInit {
       app.scene.add(ambientLight);
 
       // add ground
-      var material = new THREE.MeshBasicMaterial({color: 0x33bb55, opacity: 1.0, side: THREE.DoubleSide});
-      var geometry = new THREE.CircleGeometry( 50, 32 );
+      var material = new THREE.MeshBasicMaterial({ color: 0x33bb55, opacity: 1.0, side: THREE.DoubleSide });
+      var geometry = new THREE.CircleGeometry(50, 32);
       var plane = new THREE.Mesh(geometry, material);
-      plane.rotateX(-Math.PI/2);
+      plane.rotateX(-Math.PI / 2);
       app.scene.add(plane);
 
       app.scene.add(model);
@@ -208,15 +209,16 @@ export class FieldModelDetailsComponent implements OnInit {
       //app.controls.enablePan = true;
 
       ////if (app.isAnimationEnabled) {
-        app.startAnimation();
+      app.startAnimation();
       ////}
 
       app.renderer.render(app.scene, app.camera);
 
-    }, undefined, function ( error ) {
-      console.error( 'oops!', error );
+    }, undefined, function (error) {
+      console.error('oops!', error);
     }); // end of three.js glotf loader
   }
+
 
   createCombinedGLTF(modelGLTF, animGLTF) {
     console.log("modelGLTF:", modelGLTF);
