@@ -161,6 +161,7 @@ export class SceneDetailsComponent implements OnInit {
       let loaders = this.scene.model.modelLoaders;
       for (let i = 0; i < loaders.length; i++) {
         let loader = loaders[i];
+        loader.hrcIdShort = loader.hrcId.toLowerCase().replace('.hrc', '')
         let skeleton = {
           "id": loader.hrcId,
           "name": "TODO"

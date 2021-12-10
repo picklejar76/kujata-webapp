@@ -86,7 +86,7 @@ export class FieldOpCodeDetailsComponent implements OnInit {
       cellRenderer: undefined
     };
     if (columnName == "fieldName") {
-      columnDef.cellRenderer = (params) => { return `<a href="/scene-details/${params.value}">${params.value}</a>` }
+      columnDef.cellRenderer = (params) => { return `<a href="scene-details/${params.value}">${params.value}</a>` }
     }
     this.columnDefs.push(columnDef);
   }

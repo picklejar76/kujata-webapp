@@ -4,7 +4,7 @@
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
-        "build": "ng build --prod --base-href=\"/kujata-webapp/\"",
+        "build": "ng build --configuration production --base-href \"/kujata-webapp/\"",
         "test": "ng test",
         "lint": "ng lint",
         "e2e": "ng e2e",
