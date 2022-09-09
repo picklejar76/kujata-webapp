@@ -6,14 +6,14 @@ import * as THREE from 'three-full';
 import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 @Component({
-  selector: 'field-models',
-  templateUrl: './field-models.component.html',
-  styleUrls: ['./field-models.component.css']
+  selector: 'battle-models',
+  templateUrl: './battle-models.component.html',
+  styleUrls: ['./battle-models.component.css']
 })
-export class FieldModelsComponent implements OnInit {
+export class BattleModelsComponent implements OnInit {
 
   public environment = environment;
-  public database;
+  public battleModelList;
   public status: string;
   public status2: string;
   public uniqueBoneCounts: number[];
@@ -30,33 +30,31 @@ export class FieldModelsComponent implements OnInit {
   ngOnInit() {
     this.displays = [];
     this.status = "Loading skeleton info from database...";
-    this.http.get(environment.KUJATA_DATA_BASE_URL + '/metadata/skeleton-friendly-names.json').subscribe(skeletonFriendlyNames => {
-      this.http.get(environment.KUJATA_DATA_BASE_URL + '/metadata/ifalna.json').subscribe(ifalna => {
-        this.http.get(environment.KUJATA_DATA_BASE_URL + '/metadata/ff7-database.json').subscribe(database => {
-          this.database = database;
-          this.sortDatabaseRows();
-          this.createUniqueBoneCounts();
-          this.clock = new THREE.Clock();
-          let skeletonsToLoad = this.database.skeletons;
-          var app = this;
-          for (var i = 0; i < skeletonsToLoad.length; i++) { // skeletonsToLoad.length;
-            var skeleton = skeletonsToLoad[i];
-            skeleton.friendlyName = skeletonFriendlyNames[skeleton.id.toLowerCase()];
-            //skeleton.friendlyName2 = skeletonFriendlyNames2[skeleton.id.toLowerCase()];
-            skeleton.ifalna = ifalna[skeleton.id.toUpperCase()];
-            var display = this.createEmptyDisplay(skeleton, 'ff7_scene_container' + i, 200, 200);
-            this.displays.push(display);
+    this.http.get(environment.KUJATA_DATA_BASE_URL + '/metadata/ff7-battle-database.json').subscribe(battleModelList => {
+      this.battleModelList = battleModelList;
+      // this.sortDatabaseRows();
+      // this.createUniqueBoneCounts();
+      this.clock = new THREE.Clock();
+      var app = this;
+      for (var i = 0; i < this.battleModelList.length; i++) { // skeletonsToLoad.length;
+        var skeleton = this.battleModelList[i];
+        // skeleton.friendlyName = skeletonFriendlyNames[skeleton.id.toLowerCase()];
+        //skeleton.friendlyName2 = skeletonFriendlyNames2[skeleton.id.toLowerCase()];
+        // skeleton.ifalna = ifalna[skeleton.id.toUpperCase()];
+        var display = this.createEmptyDisplay(skeleton, 'ff7_scene_container' + i, 200, 200);
+        this.displays.push(display);
 
-            // if (i<12) {
-            //   this.delayShowDisplay(app, i, 5000 + 500*(i+1));
-            // }
-            //setTimeout(() => {app.showDisplays(app, i);}, 2000*(i+1));
-          }
-          this.recursiveLoadSkeletonAndAddToDisplay(0);
-          // this.recursiveDisplayNextSkeleton(0);
-          //setTimeout(() => {this.showDisplays();}, 250);
-        });
-      });
+        // if (i<12) {
+        //   this.delayShowDisplay(app, i, 5000 + 500*(i+1));
+        // }
+        //setTimeout(() => {app.showDisplays(app, i);}, 2000*(i+1));
+      }
+      // this.displays = this.displays.slice(0, 25);
+
+      // console.log('displays', this.displays)
+      this.recursiveLoadSkeletonAndAddToDisplay(0);
+      // this.recursiveDisplayNextSkeleton(0);
+      //setTimeout(() => {this.showDisplays();}, 250);
     });
   }
 
@@ -73,6 +71,8 @@ export class FieldModelsComponent implements OnInit {
     //setTimeout(() => {
     //console.log('showDisplay(), app:', app, 'i:', i);
     let display = app.displays[i];
+
+
     display.renderer = app.rendererGlobal; // new THREE.WebGLRenderer();
     display.renderer.setSize(150, 150);
     //display.renderer.preserveDrawingBuffer = true;
@@ -92,7 +92,7 @@ export class FieldModelsComponent implements OnInit {
       containerId: containerId,
       skeleton: skeleton,
       scene: new THREE.Scene(),
-      camera: new THREE.PerspectiveCamera(75, width / height, 0.1, 1000),
+      camera: new THREE.PerspectiveCamera(90, width / height, 0.1, 1000),
       renderer: null // new THREE.WebGLRenderer()
     };
     display.containerId = containerId;
@@ -106,12 +106,49 @@ export class FieldModelsComponent implements OnInit {
     display.scene.add(ambientLight);
 
     display.camera.position.x = 0;
-    display.camera.position.y = 13.53;
-    display.camera.position.z = 50;
+    display.camera.position.y = 0;
+    display.camera.position.z = 0;
     display.camera.rotation.x = 0 * Math.PI / 180.0;
 
     return display;
   }
+
+  private fitCameraToCenteredObject(camera, object, offset, orbitControls) {
+    const boundingBox = new THREE.Box3();
+    boundingBox.setFromObject(object);
+
+    var middle = new THREE.Vector3();
+    var size = new THREE.Vector3();
+    boundingBox.getSize(size);
+
+
+    const fov = camera.fov * (Math.PI / 180);
+    const fovh = 2 * Math.atan(Math.tan(fov / 2) * camera.aspect);
+    let dx = size.z / 2 + Math.abs(size.x / 2 / Math.tan(fovh / 2));
+    let dy = size.z / 2 + Math.abs(size.y / 2 / Math.tan(fov / 2));
+    let cameraZ = Math.max(dx, dy);
+
+    // offset the camera, if desired (to avoid filling the whole canvas)
+    if (offset !== undefined && offset !== 0) cameraZ *= offset;
+
+    camera.position.set(0, size.y / 2, cameraZ);
+
+    // set the far plane of the camera so that it easily encompasses the whole object
+    const minZ = boundingBox.min.z;
+    const cameraToFarEdge = (minZ < 0) ? -minZ + cameraZ : cameraZ - minZ;
+
+    camera.far = cameraToFarEdge * 3;
+    camera.updateProjectionMatrix();
+
+    if (orbitControls !== undefined) {
+      // set camera to rotate around the center
+      orbitControls.target = new THREE.Vector3(0, 0, 0);
+
+      // prevent camera from zooming out far enough to create far plane cutoff
+      orbitControls.maxDistance = cameraToFarEdge * 2;
+    }
+  };
+
 
   private recursiveLoadSkeletonAndAddToDisplay(i) {
     var app = this;
@@ -128,7 +165,7 @@ export class FieldModelsComponent implements OnInit {
     this.status = "Loading skeleton model " + skeleton.id + ' (' + skeleton.name + ')...';
     var gltfLoader = new THREE.GLTFLoader();
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
-    gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/field/char.lgp/' + skeleton.id + '.hrc.gltf', function (gltf) {
+    gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/battle/battle.lgp/' + skeleton.id + '.hrc.gltf', function (gltf) {
       if (!app || app.isDestroyed) {
         console.log("ignoring gltf load() callback");
         return;
@@ -140,7 +177,10 @@ export class FieldModelsComponent implements OnInit {
       rootNode.position.x = 0; // += 90.0 * Math.PI/180.0;
       rootNode.position.y = 0; // += 90.0 * Math.PI/180.0;
       rootNode.position.z = 0; // z;
+
+
       display.scene.add(model);
+      app.fitCameraToCenteredObject(display.camera, model, undefined, undefined)
       //mixer = new THREE.AnimationMixer( model );
       //mixer.clipAction(gltf.animations[0]).play();
       //animate();
@@ -158,32 +198,32 @@ export class FieldModelsComponent implements OnInit {
     });
   }
 
-  private sortDatabaseRows() {
-    /*
-    this.database.skeletons.sort((s1,s2) => {
-      return (s1.numBones - s2.numBones) || (s1.name < s2.name ? -1 : s1.name > s2.name ? 1 : 0);
-    });
-    this.database.animations.sort((a1, a2) => {
-      let cmpNumBones = a1.numBones - a2.numBones;
-      let cmpNumFrames = a1.numFrames - a2.numFrames;
-      let cmpRotOrder = (a1.rotationOrder < a2.rotationOrder ? -1 : a1.rotationOrder > a2.rotationOrder ? 1 : 0);
-      return cmpRotOrder || cmpNumBones || cmpNumFrames;
-    });
-    */
-  }
+  // private sortDatabaseRows() {
+  /*
+  this.database.skeletons.sort((s1,s2) => {
+    return (s1.numBones - s2.numBones) || (s1.name < s2.name ? -1 : s1.name > s2.name ? 1 : 0);
+  });
+  this.database.animations.sort((a1, a2) => {
+    let cmpNumBones = a1.numBones - a2.numBones;
+    let cmpNumFrames = a1.numFrames - a2.numFrames;
+    let cmpRotOrder = (a1.rotationOrder < a2.rotationOrder ? -1 : a1.rotationOrder > a2.rotationOrder ? 1 : 0);
+    return cmpRotOrder || cmpNumBones || cmpNumFrames;
+  });
+  */
+  // }
 
-  private createUniqueBoneCounts() {
-    this.boneCountSet = new Set<number>();
-    for (let skeleton of this.database.skeletons) {
-      this.boneCountSet.add(skeleton.numBones);
-    }
-    console.log('this.boneCountSet:', this.boneCountSet);
-    this.uniqueBoneCounts = [];
-    this.boneCountSet.forEach((value) => {
-      this.uniqueBoneCounts.push(value);
-    });
-    this.uniqueBoneCounts.sort((c1, c2) => { return c1 < c2 ? -1 : c1 > c2 ? 1 : 0; });
-  }
+  // private createUniqueBoneCounts() {
+  //   this.boneCountSet = new Set<number>();
+  //   for (let skeleton of this.database.skeletons) {
+  //     this.boneCountSet.add(skeleton.numBones);
+  //   }
+  //   console.log('this.boneCountSet:', this.boneCountSet);
+  //   this.uniqueBoneCounts = [];
+  //   this.boneCountSet.forEach((value) => {
+  //     this.uniqueBoneCounts.push(value);
+  //   });
+  //   this.uniqueBoneCounts.sort((c1, c2) => { return c1 < c2 ? -1 : c1 > c2 ? 1 : 0; });
+  // }
 
   /*
   var animate = function () {

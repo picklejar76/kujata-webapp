@@ -3,6 +3,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
 import * as THREE from 'three-full';
+import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 import * as d3 from "d3";
 
@@ -158,8 +159,9 @@ export class SceneDetailsComponent implements OnInit {
       this.displays = [];
       this.displayMap = {};
       let loaders = this.scene.model.modelLoaders;
-      for (let i=0; i<loaders.length; i++) {
+      for (let i = 0; i < loaders.length; i++) {
         let loader = loaders[i];
+        loader.hrcIdShort = loader.hrcId.toLowerCase().replace('.hrc', '')
         let skeleton = {
           "id": loader.hrcId,
           "name": "TODO"
@@ -200,40 +202,40 @@ export class SceneDetailsComponent implements OnInit {
       console.log("flevel:", flevel);
       var ffCamera = flevel.cameraSection.cameras[0]; // TODO: Support multiple cameras
 
-      let fovy = (2 * Math.atan(240.0/(2.0 * ffCamera.zoom))) * 57.29577951;
+      let fovy = (2 * Math.atan(240.0 / (2.0 * ffCamera.zoom))) * 57.29577951;
 
       this.walkmeshRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       this.walkmeshRenderer.setSize(410, 240);
       this.walkmeshScene = new THREE.Scene();
       this.walkmeshScene.background = new THREE.Color(0x222222);
-      this.walkmeshCamera = new THREE.PerspectiveCamera(fovy, 410/240, 0.001/4096, 100000/4096);
+      this.walkmeshCamera = new THREE.PerspectiveCamera(fovy, 410 / 240, 0.001 / 4096, 100000 / 4096);
 
-      let camAxisXx = ffCamera.xAxis.x/4096.0;
-      let camAxisXy = ffCamera.xAxis.y/4096.0;
-      let camAxisXz = ffCamera.xAxis.z/4096.0;
+      let camAxisXx = ffCamera.xAxis.x / 4096.0;
+      let camAxisXy = ffCamera.xAxis.y / 4096.0;
+      let camAxisXz = ffCamera.xAxis.z / 4096.0;
 
-      let camAxisYx = -ffCamera.yAxis.x/4096.0;
-      let camAxisYy = -ffCamera.yAxis.y/4096.0;
-      let camAxisYz = -ffCamera.yAxis.z/4096.0;
+      let camAxisYx = -ffCamera.yAxis.x / 4096.0;
+      let camAxisYy = -ffCamera.yAxis.y / 4096.0;
+      let camAxisYz = -ffCamera.yAxis.z / 4096.0;
 
-      let camAxisZx = ffCamera.zAxis.x/4096.0;
-      let camAxisZy = ffCamera.zAxis.y/4096.0;
-      let camAxisZz = ffCamera.zAxis.z/4096.0;
+      let camAxisZx = ffCamera.zAxis.x / 4096.0;
+      let camAxisZy = ffCamera.zAxis.y / 4096.0;
+      let camAxisZz = ffCamera.zAxis.z / 4096.0;
 
-      let camPosX = ffCamera.position.x/4096.0;
-      let camPosY = -ffCamera.position.y/4096.0;
-      let camPosZ = ffCamera.position.z/4096.0;
+      let camPosX = ffCamera.position.x / 4096.0;
+      let camPosY = -ffCamera.position.y / 4096.0;
+      let camPosZ = ffCamera.position.z / 4096.0;
 
-      let tx = -(camPosX*camAxisXx + camPosY*camAxisYx + camPosZ*camAxisZx);
-      let ty = -(camPosX*camAxisXy + camPosY*camAxisYy + camPosZ*camAxisZy);
-      let tz = -(camPosX*camAxisXz + camPosY*camAxisYz + camPosZ*camAxisZz);
+      let tx = -(camPosX * camAxisXx + camPosY * camAxisYx + camPosZ * camAxisZx);
+      let ty = -(camPosX * camAxisXy + camPosY * camAxisYy + camPosZ * camAxisZy);
+      let tz = -(camPosX * camAxisXz + camPosY * camAxisYz + camPosZ * camAxisZz);
 
       // gluLookAt(eyeX, eyeY, eyeZ, centerX,        centerY,        centerZ,        upX,       upY,       upZ)
       // gluLookAt(tx,   ty,   tz,   tx + camAxisZx, ty + camAxisZy, tz + camAxisZz, camAxisYx, camAxisYy, camAxisYz);
       this.walkmeshCamera.position.x = tx;
       this.walkmeshCamera.position.y = ty;
       this.walkmeshCamera.position.z = tz;
-      this.walkmeshCamera.lookAt(tx + camAxisZx, ty + camAxisZy,  tz + camAxisZz);
+      this.walkmeshCamera.lookAt(tx + camAxisZx, ty + camAxisZy, tz + camAxisZz);
       this.walkmeshCamera.up.set(camAxisYx, camAxisYy, camAxisYz);
 
       this.walkmeshCamera.updateProjectionMatrix();
@@ -246,20 +248,20 @@ export class SceneDetailsComponent implements OnInit {
 
       let triangles = flevel.walkmeshSection.triangles;
       let numTriangles = triangles.length;
-      for (let i=0; i<numTriangles; i++) {
+      for (let i = 0; i < numTriangles; i++) {
         let triangle = flevel.walkmeshSection.triangles[i];
         let accessor = flevel.walkmeshSection.accessors[i];
-        var v0 = new THREE.Vector3(triangle.vertices[0].x/4096, triangle.vertices[0].y/4096, triangle.vertices[0].z/4096);
-        var v1 = new THREE.Vector3(triangle.vertices[1].x/4096, triangle.vertices[1].y/4096, triangle.vertices[1].z/4096);
-        var v2 = new THREE.Vector3(triangle.vertices[2].x/4096, triangle.vertices[2].y/4096, triangle.vertices[2].z/4096);
-        var addLine = function(scene, va, vb, acc) {
+        var v0 = new THREE.Vector3(triangle.vertices[0].x / 4096, triangle.vertices[0].y / 4096, triangle.vertices[0].z / 4096);
+        var v1 = new THREE.Vector3(triangle.vertices[1].x / 4096, triangle.vertices[1].y / 4096, triangle.vertices[1].z / 4096);
+        var v2 = new THREE.Vector3(triangle.vertices[2].x / 4096, triangle.vertices[2].y / 4096, triangle.vertices[2].z / 4096);
+        var addLine = function (scene, va, vb, acc) {
           var lineColor = (acc == -1 ? 0x4488cc : 0x888888);
-          var material1 = new THREE.LineBasicMaterial({ color: lineColor } );
+          var material1 = new THREE.LineBasicMaterial({ color: lineColor });
           var geometry1 = new THREE.Geometry();
           geometry1.vertices.push(va);
           geometry1.vertices.push(vb);
           var line = new THREE.Line(geometry1, material1);
-          scene.add( line );
+          scene.add(line);
         }
         addLine(this.walkmeshScene, v0, v1, accessor[0]);
         addLine(this.walkmeshScene, v1, v2, accessor[1]);
@@ -270,27 +272,27 @@ export class SceneDetailsComponent implements OnInit {
       for (let gateway of flevel.triggers.gateways) {
         var lv0 = gateway.exitLineVertex1;
         var lv1 = gateway.exitLineVertex2;
-        var v0 = new THREE.Vector3(lv0.x/4096, lv0.y/4096, lv0.z/4096);
-        var v1 = new THREE.Vector3(lv1.x/4096, lv1.y/4096, lv1.z/4096);
-        var material1 = new THREE.LineBasicMaterial({ color: 0xff0000 } );
+        var v0 = new THREE.Vector3(lv0.x / 4096, lv0.y / 4096, lv0.z / 4096);
+        var v1 = new THREE.Vector3(lv1.x / 4096, lv1.y / 4096, lv1.z / 4096);
+        var material1 = new THREE.LineBasicMaterial({ color: 0xff0000 });
         var geometry1 = new THREE.Geometry();
         geometry1.vertices.push(v0);
         geometry1.vertices.push(v1);
         var line = new THREE.Line(geometry1, material1);
-        this.walkmeshScene.add( line );
+        this.walkmeshScene.add(line);
       }
 
       this.walkmeshControls = new THREE.OrbitControls(this.walkmeshCamera, this.walkmeshRenderer.domElement);
-      this.walkmeshControls.target = new THREE.Vector3(tx + camAxisZx, ty + camAxisZy,  tz + camAxisZz);
-      this.walkmeshControls.panSpeed = 1/4;
-      this.walkmeshControls.rotateSpeed = 1/4;
-      this.walkmeshControls.zoomSpeed = 1/4;
+      this.walkmeshControls.target = new THREE.Vector3(tx + camAxisZx, ty + camAxisZy, tz + camAxisZz);
+      this.walkmeshControls.panSpeed = 1 / 4;
+      this.walkmeshControls.rotateSpeed = 1 / 4;
+      this.walkmeshControls.zoomSpeed = 1 / 4;
       this.walkmeshControls.update();
 
       walkmeshContainerElement.appendChild(this.walkmeshRenderer.domElement);
       this.walkmeshRenderer.render(this.walkmeshScene, this.walkmeshCamera);
       var app = this;
-      var walkmeshTick = function() {
+      var walkmeshTick = function () {
         if (!app || app.isDestroyed) {
           console.log("stopping walkmeshTick()");
           return;
@@ -324,7 +326,7 @@ export class SceneDetailsComponent implements OnInit {
       containerId: containerId,
       skeleton: skeleton,
       scene: new THREE.Scene(),
-      camera: new THREE.PerspectiveCamera(45, this.DISPLAY_WIDTH/this.DISPLAY_HEIGHT, 0.1, 1000),
+      camera: new THREE.PerspectiveCamera(45, this.DISPLAY_WIDTH / this.DISPLAY_HEIGHT, 0.1, 1000),
       renderer: null // new THREE.WebGLRenderer()
     };
     display.containerId = containerId;
@@ -341,7 +343,7 @@ export class SceneDetailsComponent implements OnInit {
     display.camera.position.x = 0;
     display.camera.position.y = 13.53 + 20;
     display.camera.position.z = 60;
-    display.camera.lookAt(new THREE.Vector3(0,13.53,0));
+    display.camera.lookAt(new THREE.Vector3(0, 13.53, 0));
     //display.camera.up = new THREE.Vector3(0,0,1);
     //display.camera.rotation.x = (-15) * Math.PI/180.0;
     //display.camera.rotation.y = (-20) * Math.PI/180.0;
@@ -356,22 +358,22 @@ export class SceneDetailsComponent implements OnInit {
 
   public showDisplay(app, i, delay) {
     //setTimeout(() => {
-      //console.log('showDisplay(), app:', app, 'i:', i);
-      let display = app.displays[i];
-      display.renderer = app.rendererGlobal; // new THREE.WebGLRenderer();
-      display.renderer.setSize(this.DISPLAY_WIDTH, this.DISPLAY_HEIGHT);
-      //display.renderer.preserveDrawingBuffer = true;
-      var containerElement = document.getElementById(display.containerId);
-      if (!containerElement) {
-        console.log("WARN: Could not find element by display.containerId, display: ", display);
-      } else {
-        containerElement.appendChild(display.renderer.domElement);
-        display.renderer.render(display.scene, display.camera);
-        display.screenshotDataUrl = display.renderer.domElement.toDataURL();
-        display.renderer.dispose();
-        display.renderer = null;
-      }
-      //console.log('done, display.screenshotDataUrl:', display.screenshotDataUrl);
+    //console.log('showDisplay(), app:', app, 'i:', i);
+    let display = app.displays[i];
+    display.renderer = app.rendererGlobal; // new THREE.WebGLRenderer();
+    display.renderer.setSize(this.DISPLAY_WIDTH, this.DISPLAY_HEIGHT);
+    //display.renderer.preserveDrawingBuffer = true;
+    var containerElement = document.getElementById(display.containerId);
+    if (!containerElement) {
+      console.log("WARN: Could not find element by display.containerId, display: ", display);
+    } else {
+      containerElement.appendChild(display.renderer.domElement);
+      display.renderer.render(display.scene, display.camera);
+      display.screenshotDataUrl = display.renderer.domElement.toDataURL();
+      display.renderer.dispose();
+      display.renderer = null;
+    }
+    //console.log('done, display.screenshotDataUrl:', display.screenshotDataUrl);
     //}, delay);
   }
 
@@ -386,8 +388,9 @@ export class SceneDetailsComponent implements OnInit {
     ////this.status = "Loading skeleton model " + skeleton.id + ' (' + skeleton.name + ')...';
     var gltfLoader = new THREE.GLTFLoader();
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
-    gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/field/char.lgp/' + skeleton.id.toLowerCase() + '.gltf', function ( gltf ) {
+    gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/field/char.lgp/' + skeleton.id.toLowerCase() + '.gltf', function (gltf) {
       //console.log('display:', display);
+      addBlendingToMaterials(gltf)
       let model = gltf.scene;
       let rootNode = model.children[0];
       rootNode.position.x = 0; // += 90.0 * Math.PI/180.0;
@@ -401,12 +404,12 @@ export class SceneDetailsComponent implements OnInit {
       //console.log('skeleton has been added to display:', skeleton);
       app.showDisplay(app, i, 10);
       //setTimeout(() => {
-        app.recursiveLoadSkeletonAndAddToDisplay(i + 1);
+      app.recursiveLoadSkeletonAndAddToDisplay(i + 1);
       //}, 10);
-    }, undefined, function ( error ) {
-      console.error( 'oops!', error );
+    }, undefined, function (error) {
+      console.error('oops!', error);
       //setTimeout(() => {
-        app.recursiveLoadSkeletonAndAddToDisplay(i + 1);
+      app.recursiveLoadSkeletonAndAddToDisplay(i + 1);
       //}, 10);
     });
   }
@@ -438,7 +441,7 @@ export class SceneDetailsComponent implements OnInit {
           colIndex = 0;
           let startNode = {
             type: "scriptStart",
-            id:   "scriptStart|" + e + "|" + s,
+            id: "scriptStart|" + e + "|" + s,
             row: rowIndex,
             col: colIndex++,
             name: e + ":" + entity.entityName + ", Script " + s,
@@ -447,11 +450,11 @@ export class SceneDetailsComponent implements OnInit {
           startNode.labelLines = this.stringToLines(startNode.name, MVC.LABEL_LINE_LENGTH);
           row.push(startNode);
           this.addNodeToGraphAndMap(startNode);
-          for (let i=0; i<script.ops.length; i++) {
+          for (let i = 0; i < script.ops.length; i++) {
             let op = script.ops[i];
             let opNode = {
               type: op.op == "RET" ? "scriptEnd" : "op",
-              id:   "op|" + e + "|" + s + "|" + i,
+              id: "op|" + e + "|" + s + "|" + i,
               row: rowIndex,
               col: colIndex++,
               name: op.js,
@@ -556,9 +559,9 @@ export class SceneDetailsComponent implements OnInit {
       if (pos == -1) {
         pos = maxLineLength;
       }
-      let nextLine = remainder.substring(0, pos+1);
+      let nextLine = remainder.substring(0, pos + 1);
       lines.push(nextLine);
-      remainder = remainder.substring(pos+1);
+      remainder = remainder.substring(pos + 1);
       ////console.log("nextLine='" + nextLine + "', remainder='" + remainder + "'");
     }
     console.log("WARNING: maxines reached!");
@@ -579,68 +582,68 @@ export class SceneDetailsComponent implements OnInit {
       .data(this.graph.links)
       .enter()
       .append("line")
-      .attr("stroke-width", function(d) {
+      .attr("stroke-width", function (d) {
         return 2;
       })
-      .attr("stroke", function(d) {
+      .attr("stroke", function (d) {
         return "gray";
       })
-    ;
+      ;
     var node = view.append("g").attr("class", "nodes")
       .selectAll("g")
       .data(this.graph.nodes)
       .enter()
       .append("g")
-      .attr("transform", function(d) {
+      .attr("transform", function (d) {
         let x = MVC.getNodeCenterX(d);
         let y = MVC.getNodeCenterY(d);
         return "translate(" + x + " " + y + ")";
       })
-    ;
+      ;
 
     link
-      .attr("x1", function(d) { return MVC.getNodeRightEdgeX(d.source); })
-      .attr("y1", function(d) { return MVC.getNodeCenterY(d.source); })
-      .attr("x2", function(d) { return MVC.getNodeLeftEdgeX(d.target); })
-      .attr("y2", function(d) { return MVC.getNodeCenterY(d.target); })
-    ;
+      .attr("x1", function (d) { return MVC.getNodeRightEdgeX(d.source); })
+      .attr("y1", function (d) { return MVC.getNodeCenterY(d.source); })
+      .attr("x2", function (d) { return MVC.getNodeLeftEdgeX(d.target); })
+      .attr("y2", function (d) { return MVC.getNodeCenterY(d.target); })
+      ;
 
     var rects = node.append("rect")
-      .attr("rx",     function(d) { return  MVC.GRID_X * 0.05;         })
-      .attr("ry",     function(d) { return  MVC.GRID_X * 0.05;         })
-      .attr("x",      function(d) { return -MVC.getNodeWidth(d) / 2;   })
-      .attr("y",      function(d) { return -MVC.getNodeHeight(d) / 2;  })
-      .attr("width",  function(d) { return  MVC.getNodeWidth(d);       })
-      .attr("height", function(d) { return  MVC.getNodeHeight(d);      })
-      .attr("stroke", function(d) { return d.type == "scriptStart" ? "#339933" : d.type == "scriptEnd" ? "#993333" : "gray"; })
+      .attr("rx", function (d) { return MVC.GRID_X * 0.05; })
+      .attr("ry", function (d) { return MVC.GRID_X * 0.05; })
+      .attr("x", function (d) { return -MVC.getNodeWidth(d) / 2; })
+      .attr("y", function (d) { return -MVC.getNodeHeight(d) / 2; })
+      .attr("width", function (d) { return MVC.getNodeWidth(d); })
+      .attr("height", function (d) { return MVC.getNodeHeight(d); })
+      .attr("stroke", function (d) { return d.type == "scriptStart" ? "#339933" : d.type == "scriptEnd" ? "#993333" : "gray"; })
       .attr("stroke-width", "2")
-      .attr("fill", function(d) { return "white"; });
+      .attr("fill", function (d) { return "white"; });
 
     var labels = node.append("text")
-      .attr("fill", function(d) {
+      .attr("fill", function (d) {
         return "#333";
       })
       .attr('x', 0)
-      .attr('y', function(d) {
+      .attr('y', function (d) {
         if (!d.labelLines) {
           console.log("This does not have labelLines:", d);
         }
-        return ((-(d.labelLines.length) / 2) - 1/2) + "em";
+        return ((-(d.labelLines.length) / 2) - 1 / 2) + "em";
       })
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'central')
-    ;
+      ;
 
-    for (let i=0; i<10; i++) {
+    for (let i = 0; i < 10; i++) {
       labels
-        .filter(function(d) { return d.labelLines.length > i; })
+        .filter(function (d) { return d.labelLines.length > i; })
         .append("tspan")
         .attr('x', 0)
         .attr('dy', '1em')
         .attr('text-anchor', 'middle')
         .attr('alignment-baseline', 'central')
-        .text(function(d) { return d.labelLines[i]; })
-      ;
+        .text(function (d) { return d.labelLines[i]; })
+        ;
     }
 
     /*

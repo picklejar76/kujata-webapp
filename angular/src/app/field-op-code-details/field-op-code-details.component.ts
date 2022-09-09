@@ -1,6 +1,6 @@
 import { environment } from '../../environments/environment';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 
@@ -13,6 +13,7 @@ export class FieldOpCodeDetailsComponent implements OnInit {
 
   public opMetadata;
   public selectedOpCode = null;
+  public selectedOpDescription = '...loading...';
   public selectedOpMetadata = null;
   public usages = [];
   public fetchStatus = "NONE"; // NONE, FETCHING, SUCCESS, ERROR
@@ -41,7 +42,7 @@ export class FieldOpCodeDetailsComponent implements OnInit {
   };
   public gridOptions;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {
+  constructor(private route: ActivatedRoute, private router: Router, private http: HttpClient) {
   }
 
   ngOnInit() {
@@ -50,9 +51,9 @@ export class FieldOpCodeDetailsComponent implements OnInit {
       columnDefs: this.columnDefs,
       //pagination: true,
       rowSelection: 'single',
-      onRowClicked: function(event) { console.log('a row was clicked'); },
-      onColumnResized: function(event) { console.log('a column was resized'); },
-      onGridReady: function(event) { console.log('the grid is now ready'); },
+      onRowClicked: function (event) { console.log('a row was clicked'); },
+      onColumnResized: function (event) { console.log('a column was resized'); },
+      onGridReady: function (event) { console.log('the grid is now ready'); },
       //noRowsToShow: ""
       suppressNoRowsOverlay: true
     }
@@ -80,13 +81,12 @@ export class FieldOpCodeDetailsComponent implements OnInit {
       sortable: true,
       filter: true,
       resizable: true,
+      onCellClicked: undefined,
+      cellStyle: undefined,
       cellRenderer: undefined
     };
     if (columnName == "fieldName") {
-      columnDef.cellRenderer = (params) => {
-        // TODO: Find out how to make this a router link
-        return '<a href="/scene-details/' + params.value + '">' + params.value + '</a>';
-      };
+      columnDef.cellRenderer = (params) => { return `<a href="scene-details/${params.value}">${params.value}</a>` }
     }
     this.columnDefs.push(columnDef);
   }
@@ -95,6 +95,7 @@ export class FieldOpCodeDetailsComponent implements OnInit {
     if (!this.opMetadata) { return; }
     if (!this.selectedOpCode) { return; }
     this.selectedOpMetadata = this.opMetadata[this.selectedOpCode];
+    this.selectedOpDescription = `${this.selectedOpMetadata.shortName} - ${this.selectedOpMetadata.description}`
     this.fetchStatus = "FETCHING";
     if (this.gridOptions.api) {
       this.gridOptions.api.showLoadingOverlay();
