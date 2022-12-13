@@ -1,8 +1,9 @@
 import { environment } from '../../environments/environment';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import * as THREE from 'three-full';
-//import * as THREE from 'GLTFLoader';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 @Component({
@@ -75,6 +76,7 @@ export class BattleModelsComponent implements OnInit {
 
     display.renderer = app.rendererGlobal; // new THREE.WebGLRenderer();
     display.renderer.setSize(150, 150);
+    display.renderer.outputEncoding = THREE.sRGBEncoding
     //display.renderer.preserveDrawingBuffer = true;
     var containerElement = document.getElementById(display.containerId);
     containerElement.appendChild(display.renderer.domElement);
@@ -163,7 +165,7 @@ export class BattleModelsComponent implements OnInit {
     var display = app.displays[i];
     var skeleton = display.skeleton;
     this.status = "Loading skeleton model " + skeleton.id + ' (' + skeleton.name + ')...';
-    var gltfLoader = new THREE.GLTFLoader();
+    var gltfLoader = new GLTFLoader();
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
     gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/battle/battle.lgp/' + skeleton.id + '.hrc.gltf', function (gltf) {
       if (!app || app.isDestroyed) {

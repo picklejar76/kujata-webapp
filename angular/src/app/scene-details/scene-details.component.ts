@@ -2,7 +2,9 @@ import { environment } from '../../environments/environment';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
-import * as THREE from 'three-full';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 import * as d3 from "d3";
@@ -257,7 +259,7 @@ export class SceneDetailsComponent implements OnInit {
         var addLine = function (scene, va, vb, acc) {
           var lineColor = (acc == -1 ? 0x4488cc : 0x888888);
           var material1 = new THREE.LineBasicMaterial({ color: lineColor });
-          var geometry1 = new THREE.Geometry();
+          var geometry1 = new THREE.BufferGeometry();
           geometry1.vertices.push(va);
           geometry1.vertices.push(vb);
           var line = new THREE.Line(geometry1, material1);
@@ -275,14 +277,14 @@ export class SceneDetailsComponent implements OnInit {
         var v0 = new THREE.Vector3(lv0.x / 4096, lv0.y / 4096, lv0.z / 4096);
         var v1 = new THREE.Vector3(lv1.x / 4096, lv1.y / 4096, lv1.z / 4096);
         var material1 = new THREE.LineBasicMaterial({ color: 0xff0000 });
-        var geometry1 = new THREE.Geometry();
+        var geometry1 = new THREE.BufferGeometry();
         geometry1.vertices.push(v0);
         geometry1.vertices.push(v1);
         var line = new THREE.Line(geometry1, material1);
         this.walkmeshScene.add(line);
       }
 
-      this.walkmeshControls = new THREE.OrbitControls(this.walkmeshCamera, this.walkmeshRenderer.domElement);
+      this.walkmeshControls = new OrbitControls(this.walkmeshCamera, this.walkmeshRenderer.domElement);
       this.walkmeshControls.target = new THREE.Vector3(tx + camAxisZx, ty + camAxisZy, tz + camAxisZz);
       this.walkmeshControls.panSpeed = 1 / 4;
       this.walkmeshControls.rotateSpeed = 1 / 4;
@@ -386,7 +388,7 @@ export class SceneDetailsComponent implements OnInit {
     var display = app.displays[i];
     var skeleton = display.skeleton;
     ////this.status = "Loading skeleton model " + skeleton.id + ' (' + skeleton.name + ')...';
-    var gltfLoader = new THREE.GLTFLoader();
+    var gltfLoader = new GLTFLoader();
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
     gltfLoader.load(environment.KUJATA_DATA_BASE_URL + '/data/field/char.lgp/' + skeleton.id.toLowerCase() + '.gltf', function (gltf) {
       //console.log('display:', display);

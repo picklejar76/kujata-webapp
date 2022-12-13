@@ -1,6 +1,6 @@
 .model-panel {
-  width:360px;
-  height:400px;
+  width:620px;
+  height:660px;
   background-color:#f0f0f0;
   margin:4px 4px 0px 0px;
   text-align:center;
@@ -9,7 +9,7 @@
 
 .animations-panel {
   width:360px;
-  height:400px;
+  height:660px;
   background-color:#f0f0f0;
   margin:4px 4px 0px 0px;
   overflow-y:auto;

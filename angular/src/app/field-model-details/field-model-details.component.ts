@@ -3,7 +3,9 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import * as THREE from 'three-full';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 @Component({
@@ -167,7 +169,7 @@ export class FieldModelDetailsComponent implements OnInit {
     }
 
     console.log("modelRootHeight=" + modelRootHeight);
-    var gltfLoader = new THREE.GLTFLoader();
+    var gltfLoader = new GLTFLoader();
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
     gltfLoader.parse(JSON.stringify(combinedGLTF), app.CHAR_BASE_URL, function (gltf) {
       addBlendingToMaterials(gltf)
@@ -202,7 +204,7 @@ export class FieldModelDetailsComponent implements OnInit {
       var containerElement = document.getElementById("scene-container");
       containerElement.appendChild(app.renderer.domElement);
 
-      app.controls = new THREE.OrbitControls(app.camera, app.renderer.domElement);
+      app.controls = new OrbitControls(app.camera, app.renderer.domElement);
       app.controls.target = new THREE.Vector3(0, modelRootHeight, 0);
       app.controls.update();
       // app.controls.target.set( 0, 0.5, 0 );

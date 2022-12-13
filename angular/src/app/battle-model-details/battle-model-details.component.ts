@@ -2,8 +2,9 @@ import { environment } from '../../environments/environment';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import * as THREE from 'three-full';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 @Component({
@@ -15,8 +16,8 @@ export class BattleModelDetailsComponent implements OnInit {
 
   public environment = environment;
   public BATTLE_LGP_BASE_URL = environment.KUJATA_DATA_BASE_URL + '/data/battle/battle.lgp/';
-  public SCENE_WIDTH = 300;
-  public SCENE_HEIGHT = 300;
+  public SCENE_WIDTH = 600;
+  public SCENE_HEIGHT = 600;
   public fieldModelMetadata;
   public skeletonFriendlyNames;
   public bodyAnimationIdToIndexMap = {};
@@ -83,7 +84,7 @@ export class BattleModelDetailsComponent implements OnInit {
     this.clock = new THREE.Clock();
     this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     this.renderer.setSize(this.SCENE_WIDTH, this.SCENE_HEIGHT);
-
+    this.renderer.outputEncoding = THREE.sRGBEncoding
     // clear these variables in case a user re-visits this page after leaving it
     // (in particular, if the number of bones changes in between character selections)
     this.modelGLTF = null;
@@ -151,23 +152,39 @@ export class BattleModelDetailsComponent implements OnInit {
     }
     if (app.camera.position.y == 0) {
       console.log("setting camera height to:" + modelRootHeight * 2);
-      app.camera.position.y = modelRootHeight * 1.5;
+      app.camera.position.y = 600+(modelRootHeight * 1.5);
       app.camera.position.z = Math.max(modelRootHeight * 2.5, 1000);
     }
 
-    var gltfLoader = new THREE.GLTFLoader();
+    var gltfLoader = new GLTFLoader();
     gltfLoader.parse(JSON.stringify(combinedGLTF), app.BATTLE_LGP_BASE_URL, function (gltf) {
       addBlendingToMaterials(gltf)
       console.log("parsed gltf:", gltf);
 
+      // What a mess, the GLTF render order is horrible
+      // gltf.scene.traverse(function (obj) {
+      //   if (obj.material) {
+      //     obj.material.depthWrite = false
+      //     obj.material.transparent = true
+      //     obj.renderOrder = obj.name
+      //     const nameSplit = obj.name.split('_')
+      //     if (nameSplit.length > 1) {
+      //       obj.renderOrder = 100-parseInt(nameSplit[1])
+      //     }
+
+      //     const pos = obj.geometry.getAttribute('position').array
+      //     const posA = { x: pos[0], y: pos[1], z: pos[2] }
+      //     posA['d2'] = posA.x * posA.x + posA.y * posA.y + posA.z * posA.z;
+      //     // obj.renderOrder= -posA['d2']
+      //     console.log('mesh', obj, obj.position, obj.renderOrder, pos, posA)
+      //   }
+      // })
+
+
       ////let modelHeight = gltf.nodes[1].translation[1];
       app.gltf = gltf;
       let model = gltf.scene;
-      let rootNode = model.children[0];
-      //rootNode.position.x = 0;
-      //rootNode.position.y += modelHeight;
-      //rootNode.position.z = 0;
-      rootNode.rotation.y = -60 * Math.PI / 180.0; // rotate the model to a near-side view similar to battle screen
+      gltf.scene.rotation.y = -20 * Math.PI / 180.0; // rotate the model to a near-side view similar to battle screen
       app.scene = new THREE.Scene();
       ////app.camera = new THREE.PerspectiveCamera(90, app.SCENE_WIDTH/app.SCENE_HEIGHT, 0.1, 1000);
 
@@ -196,7 +213,8 @@ export class BattleModelDetailsComponent implements OnInit {
       var containerElement = document.getElementById("scene-container");
       containerElement.appendChild(app.renderer.domElement);
 
-      app.controls = new THREE.OrbitControls(app.camera, app.renderer.domElement);
+      app.controls = new OrbitControls(app.camera, app.renderer.domElement);
+      // console.log('offset', gltf.scene.children[0], gltf.scene.children[0].position)
       app.controls.target = new THREE.Vector3(0, modelRootHeight, 0);
       app.controls.update();
       //app.controls.enablePan = true;
@@ -211,10 +229,13 @@ export class BattleModelDetailsComponent implements OnInit {
   }
 
   public startAnimation() {
-    this.isAnimationEnabled = true;
-    this.mixer = new THREE.AnimationMixer(this.gltf.scene);
-    let animationIndex = this.bodyAnimationIdToIndexMap[this.selectedAnimId];
-    this.mixer.clipAction(this.gltf.animations[animationIndex]).play();
+    if (this.selectedAnimId) {
+      this.isAnimationEnabled = true;
+      this.mixer = new THREE.AnimationMixer(this.gltf.scene);
+      let animationIndex = this.bodyAnimationIdToIndexMap[this.selectedAnimId]
+      this.controls.target.y = this.controls.target.y + this.gltf.animations[animationIndex].tracks[0].values[1]
+      this.mixer.clipAction(this.gltf.animations[animationIndex]).play();
+    }
   }
 
   public stopAnimation() {
