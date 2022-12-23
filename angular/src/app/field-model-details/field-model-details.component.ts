@@ -173,6 +173,14 @@ export class FieldModelDetailsComponent implements OnInit {
     //gltfLoader.setDRACOLoader( new THREE.DRACOLoader() );
     gltfLoader.parse(JSON.stringify(combinedGLTF), app.CHAR_BASE_URL, function (gltf) {
       addBlendingToMaterials(gltf)
+
+      // Quick hack for smooth animations until we remove the duplicate frames in the gltfs
+      for (const anim of gltf.animations) {
+        for (const track of anim.tracks) {
+          track.optimize()
+        }
+      }
+
       console.log("combined gltf:", gltf);
       ////let modelHeight = gltf.nodes[1].translation[1];
       app.gltf = gltf;

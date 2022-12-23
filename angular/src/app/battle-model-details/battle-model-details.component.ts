@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import GUI from 'lil-gui'
 import { addBlendingToMaterials } from '../helpers/gltf-helper'
 
 @Component({
@@ -159,27 +160,46 @@ export class BattleModelDetailsComponent implements OnInit {
     var gltfLoader = new GLTFLoader();
     gltfLoader.parse(JSON.stringify(combinedGLTF), app.BATTLE_LGP_BASE_URL, function (gltf) {
       addBlendingToMaterials(gltf)
+
+      // Quick hack for smooth animations until we remove the duplicate frames in the gltfs
+      for (const anim of gltf.animations) {
+        for (const track of anim.tracks) {
+          track.optimize()
+        }
+      }
+
       console.log("parsed gltf:", gltf);
-
-      // What a mess, the GLTF render order is horrible
+      // const gui = new GUI();
+      // const blankMat = new THREE.MeshLambertMaterial({color:'red'})
+      // // What a mess, the GLTF render order is horrible
+      // const meshList = []
       // gltf.scene.traverse(function (obj) {
-      //   if (obj.material) {
-      //     obj.material.depthWrite = false
-      //     obj.material.transparent = true
-      //     obj.renderOrder = obj.name
-      //     const nameSplit = obj.name.split('_')
-      //     if (nameSplit.length > 1) {
-      //       obj.renderOrder = 100-parseInt(nameSplit[1])
-      //     }
-
+      //   if (obj.material && obj.material.map) {
+      //     // obj.material.depthWrite = false
+      //     // obj.material.transparent = true
+      //     // obj.material.wireframe = true
+      //     // obj.material = blankMat
+      //     // obj.material.map.isTexture = false
+      //     // obj.material.map.needsUpdate = true
+      //     // delete obj.material.map
+      //     // obj.material.needsUpdate = true
       //     const pos = obj.geometry.getAttribute('position').array
       //     const posA = { x: pos[0], y: pos[1], z: pos[2] }
       //     posA['d2'] = posA.x * posA.x + posA.y * posA.y + posA.z * posA.z;
       //     // obj.renderOrder= -posA['d2']
       //     console.log('mesh', obj, obj.position, obj.renderOrder, pos, posA)
+      //     meshList.push(obj)
+
+      //     gui.add(obj, 'visible').name(obj.name)
       //   }
       // })
-
+      // let i = 0
+      // for (const obj of meshList) {
+      //   // obj.position.z = i
+      //   // obj.renderOrder = i
+      //   i++
+      //   console.log('meshList', obj.position)
+      // }
 
       ////let modelHeight = gltf.nodes[1].translation[1];
       app.gltf = gltf;
@@ -196,11 +216,13 @@ export class BattleModelDetailsComponent implements OnInit {
         light.position.set(x, y, z).normalize();
         app.scene.add(light);
       }
-      addDirectionalLight(4, 2, 3);
+      // addDirectionalLight(0, 100, 0);
       addDirectionalLight(4, 2, 3);
       addDirectionalLight(0, -2, -3);
       var ambientLight = new THREE.AmbientLight(0x404040); // 0x404040 = soft white light
       app.scene.add(ambientLight);
+      // const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+      // app.scene.add( light );
 
       // add ground
       var material = new THREE.MeshBasicMaterial({ color: 0x33bb55, opacity: 1.0, side: THREE.DoubleSide });
@@ -234,7 +256,9 @@ export class BattleModelDetailsComponent implements OnInit {
       this.mixer = new THREE.AnimationMixer(this.gltf.scene);
       let animationIndex = this.bodyAnimationIdToIndexMap[this.selectedAnimId]
       this.controls.target.y = this.controls.target.y + this.gltf.animations[animationIndex].tracks[0].values[1]
-      this.mixer.clipAction(this.gltf.animations[animationIndex]).play();
+      const action = this.mixer.clipAction(this.gltf.animations[animationIndex])
+      // action.timeScale = 0.2
+      action.play();
     }
   }
 
