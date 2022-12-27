@@ -94,6 +94,7 @@ export class FieldModelDetailsComponent implements OnInit {
     this.clock = new THREE.Clock();
     this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     this.renderer.setSize(this.SCENE_WIDTH, this.SCENE_HEIGHT);
+    this.renderer.outputEncoding = THREE.sRGBEncoding
 
     // clear these variables in case a user re-visits this page after leaving it
     // (in particular, if the number of bones changes in between character sleections)
